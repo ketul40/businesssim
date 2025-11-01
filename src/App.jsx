@@ -1,93 +1,317 @@
-import { useState } from 'react'
-import './App.css'
+import { useState, useEffect } from 'react';
+import { LogOut, User as UserIcon } from 'lucide-react';
+import './App.css';
+
+// Components
+import AuthScreen from './components/AuthScreen';
+import ScenarioSelect from './components/ScenarioSelect';
+import ChatInterface from './components/ChatInterface';
+import Sidebar from './components/Sidebar';
+import Feedback from './components/Feedback';
+import ProgressDashboard from './components/ProgressDashboard';
+
+// Hooks and utils
+import { useAuth } from './hooks/useAuth';
+import { signOutUser } from './firebase/auth';
+import { createSession, updateSession } from './firebase/firestore';
+import { getStakeholderResponse, getCoachingHint, evaluateSession } from './utils/aiService';
+
+// Constants
+import { SIM_STATES, SIDEBAR_TABS, MESSAGE_TYPES } from './constants/states';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { user, userData, loading: authLoading, isAuthenticated } = useAuth();
+  
+  // App state
+  const [appState, setAppState] = useState(SIM_STATES.SCENARIO_SELECT);
+  const [selectedScenario, setSelectedScenario] = useState(null);
+  const [currentSessionId, setCurrentSessionId] = useState(null);
+  
+  // Simulation state
+  const [messages, setMessages] = useState([]);
+  const [turnCount, setTurnCount] = useState(0);
+  const [isAILoading, setIsAILoading] = useState(false);
+  
+  // Sidebar state
+  const [activeSidebarTab, setActiveSidebarTab] = useState(SIDEBAR_TABS.CONTEXT);
+  const [notes, setNotes] = useState('');
+  
+  // Evaluation state
+  const [evaluation, setEvaluation] = useState(null);
+
+  // Handle scenario selection
+  const handleSelectScenario = async (scenario) => {
+    setSelectedScenario(scenario);
+    setMessages([]);
+    setTurnCount(0);
+    setNotes('');
+    setEvaluation(null);
+    
+    // Create session in Firebase if user is authenticated
+    if (user) {
+      try {
+        const sessionId = await createSession({
+          userId: user.uid,
+          scenario: scenario,
+          turnLimit: scenario.turnLimit,
+          settings: {
+            difficulty: scenario.difficulty
+          }
+        });
+        setCurrentSessionId(sessionId);
+      } catch (error) {
+        console.error('Error creating session:', error);
+      }
+    }
+    
+    setAppState(SIM_STATES.IN_SIM);
+  };
+
+  // Handle sending a message
+  const handleSendMessage = async (content) => {
+    const userMessage = {
+      type: MESSAGE_TYPES.USER,
+      content,
+      timestamp: new Date().toISOString()
+    };
+    
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
+    setTurnCount(turnCount + 1);
+    
+    // Update session in Firebase
+    if (currentSessionId) {
+      try {
+        await updateSession(currentSessionId, {
+          transcript: newMessages,
+          turnCount: turnCount + 1
+        });
+      } catch (error) {
+        console.error('Error updating session:', error);
+      }
+    }
+    
+    // Get AI response
+    setIsAILoading(true);
+    try {
+      const response = await getStakeholderResponse(
+        { scenario: selectedScenario, transcript: newMessages, turnCount: turnCount + 1 },
+        content
+      );
+      
+      const aiMessage = {
+        type: MESSAGE_TYPES.AI,
+        content: response.message,
+        stakeholder: response.stakeholder,
+        role: response.role,
+        timestamp: response.timestamp
+      };
+      
+      const updatedMessages = [...newMessages, aiMessage];
+      setMessages(updatedMessages);
+      
+      // Update session again with AI response
+      if (currentSessionId) {
+        await updateSession(currentSessionId, {
+          transcript: updatedMessages
+        });
+      }
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      const errorMessage = {
+        type: MESSAGE_TYPES.SYSTEM,
+        content: 'Error: Unable to get response. Please try again.',
+        timestamp: new Date().toISOString()
+      };
+      setMessages([...newMessages, errorMessage]);
+    } finally {
+      setIsAILoading(false);
+    }
+  };
+
+  // Handle timeout (coaching hint)
+  const handleTimeout = async () => {
+    setAppState(SIM_STATES.TIMEOUT);
+    setIsAILoading(true);
+    
+    try {
+      const hint = await getCoachingHint({
+        scenario: selectedScenario,
+        transcript: messages,
+        turnCount
+      });
+      
+      const coachingMessage = {
+        type: MESSAGE_TYPES.COACHING,
+        content: hint,
+        timestamp: new Date().toISOString()
+      };
+      
+      setMessages([...messages, coachingMessage]);
+    } catch (error) {
+      console.error('Error getting coaching hint:', error);
+    } finally {
+      setIsAILoading(false);
+      setAppState(SIM_STATES.IN_SIM);
+    }
+  };
+
+  // Handle exit and evaluate
+  const handleExit = async () => {
+    setAppState(SIM_STATES.EXITED);
+    setIsAILoading(true);
+    
+    try {
+      // Update session status
+      if (currentSessionId) {
+        await updateSession(currentSessionId, {
+          completedAt: new Date(),
+          state: 'EXITED'
+        });
+      }
+      
+      // Get evaluation
+      const evaluationResult = await evaluateSession(currentSessionId, {
+        scenario: selectedScenario,
+        transcript: messages
+      });
+      
+      setEvaluation(evaluationResult);
+      setAppState(SIM_STATES.EVALUATED);
+    } catch (error) {
+      console.error('Error evaluating session:', error);
+    } finally {
+      setIsAILoading(false);
+    }
+  };
+
+  // Handle back to home
+  const handleBackHome = () => {
+    setAppState(SIM_STATES.SCENARIO_SELECT);
+    setSelectedScenario(null);
+    setMessages([]);
+    setTurnCount(0);
+    setEvaluation(null);
+    setCurrentSessionId(null);
+  };
+
+  // Handle rerun scenario
+  const handleRerunScenario = () => {
+    if (selectedScenario) {
+      handleSelectScenario(selectedScenario);
+    }
+  };
+
+  // Handle view progress
+  const handleViewProgress = () => {
+    setAppState(SIM_STATES.PROGRESS_VIEW);
+  };
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      handleBackHome();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  // Auth loading
+  if (authLoading) {
+    return (
+      <div className="app-loading">
+        <div className="spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Show auth screen if not authenticated
+  if (!isAuthenticated) {
+    return <AuthScreen />;
+  }
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="logo">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="40" height="40" rx="8" fill="url(#gradient)"/>
-            <path d="M12 20L18 26L28 14" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-            <defs>
-              <linearGradient id="gradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#646cff"/>
-                <stop offset="1" stopColor="#535bf2"/>
-              </linearGradient>
-            </defs>
-          </svg>
-          <h1>BusinessSim</h1>
+      {/* App Header */}
+      <header className="app-header">
+        <div className="header-left">
+          <h1 className="app-title" onClick={handleBackHome} style={{ cursor: 'pointer' }}>
+            BusinessSim
+          </h1>
+          {appState !== SIM_STATES.SCENARIO_SELECT && appState !== SIM_STATES.PROGRESS_VIEW && (
+            <span className="header-subtitle">{selectedScenario?.title}</span>
+          )}
         </div>
-        <nav className="nav">
-          <a href="#features">Features</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
-        </nav>
+        <div className="header-right">
+          <button className="btn btn-ghost btn-small" onClick={handleViewProgress}>
+            Progress
+          </button>
+          <div className="user-menu">
+            <UserIcon size={18} />
+            <span>{userData?.displayName || user?.email}</span>
+          </div>
+          <button className="btn btn-ghost btn-small" onClick={handleSignOut}>
+            <LogOut size={18} />
+          </button>
+        </div>
       </header>
 
-      <main className="main">
-        <section className="hero">
-          <h2 className="hero-title">Welcome to Your React App</h2>
-          <p className="hero-subtitle">
-            A modern, beautiful starting point for your next project
-          </p>
-          
-          <div className="card">
-            <div className="counter">
-              <button onClick={() => setCount((count) => count - 1)} className="btn btn-secondary">
-                -
-              </button>
-              <div className="count-display">
-                <span className="count-label">Counter</span>
-                <span className="count-value">{count}</span>
-              </div>
-              <button onClick={() => setCount((count) => count + 1)} className="btn btn-secondary">
-                +
-              </button>
-            </div>
-            <button onClick={() => setCount(0)} className="btn btn-primary">
-              Reset Counter
-            </button>
-          </div>
+      {/* Main Content */}
+      <main className="app-main">
+        {appState === SIM_STATES.SCENARIO_SELECT && (
+          <ScenarioSelect onSelectScenario={handleSelectScenario} />
+        )}
 
-          <div className="features-grid" id="features">
-            <div className="feature">
-              <div className="feature-icon">⚡</div>
-              <h3>Lightning Fast</h3>
-              <p>Built with Vite for instant HMR and optimized builds</p>
+        {appState === SIM_STATES.PROGRESS_VIEW && (
+          <ProgressDashboard
+            userId={user?.uid}
+            onStartNewScenario={handleBackHome}
+          />
+        )}
+
+        {(appState === SIM_STATES.IN_SIM || appState === SIM_STATES.TIMEOUT) && (
+          <div className="simulation-layout">
+            <div className="simulation-main">
+              <ChatInterface
+                scenario={selectedScenario}
+                messages={messages}
+                onSendMessage={handleSendMessage}
+                onTimeout={handleTimeout}
+                onExit={handleExit}
+                turnCount={turnCount}
+                isLoading={isAILoading}
+              />
             </div>
-            <div className="feature">
-              <div className="feature-icon">🎨</div>
-              <h3>Beautiful UI</h3>
-              <p>Modern design with smooth animations and gradients</p>
-            </div>
-            <div className="feature">
-              <div className="feature-icon">🔧</div>
-              <h3>Ready to Use</h3>
-              <p>All dependencies configured and ready to go</p>
-            </div>
-            <div className="feature">
-              <div className="feature-icon">📱</div>
-              <h3>Responsive</h3>
-              <p>Looks great on all devices and screen sizes</p>
-            </div>
+            <Sidebar
+              scenario={selectedScenario}
+              activeTab={activeSidebarTab}
+              onTabChange={setActiveSidebarTab}
+              notes={notes}
+              onNotesChange={setNotes}
+            />
           </div>
-        </section>
+        )}
+
+        {appState === SIM_STATES.EVALUATED && (
+          <Feedback
+            evaluation={evaluation}
+            scenario={selectedScenario}
+            onBackHome={handleBackHome}
+            onRerunScenario={handleRerunScenario}
+          />
+        )}
+
+        {appState === SIM_STATES.EXITED && !evaluation && (
+          <div className="evaluation-loading">
+            <div className="spinner"></div>
+            <p>Evaluating your performance...</p>
+          </div>
+        )}
       </main>
-
-      <footer className="footer">
-        <p>Built with React + Vite</p>
-        <p className="footer-links">
-          <a href="https://react.dev" target="_blank" rel="noopener noreferrer">React Docs</a>
-          <span>•</span>
-          <a href="https://vitejs.dev" target="_blank" rel="noopener noreferrer">Vite Docs</a>
-        </p>
-      </footer>
     </div>
-  )
+  );
 }
 
-export default App
-
+export default App;
