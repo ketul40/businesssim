@@ -20,7 +20,7 @@ import { getStakeholderResponse, getCoachingHint, evaluateSession } from './util
 import { SIM_STATES, SIDEBAR_TABS, MESSAGE_TYPES } from './constants/states';
 
 function App() {
-  const { user, userData, loading: authLoading, isAuthenticated } = useAuth();
+  const { user, userData, loading: authLoading, isAuthenticated, isGuest } = useAuth();
   
   // App state
   const [appState, setAppState] = useState(SIM_STATES.SCENARIO_SELECT);
@@ -120,7 +120,7 @@ function App() {
       console.error('Error getting AI response:', error);
       const errorMessage = {
         type: MESSAGE_TYPES.SYSTEM,
-        content: 'Error: Unable to get response. Please try again.',
+        content: `Error: ${error.message || 'Unable to get AI response. Check console for details.'}`,
         timestamp: new Date().toISOString()
       };
       setMessages([...newMessages, errorMessage]);
@@ -217,6 +217,10 @@ function App() {
     }
   };
 
+  // State for auth modal
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authReason, setAuthReason] = useState('');
+
   // Auth loading
   if (authLoading) {
     return (
@@ -227,10 +231,11 @@ function App() {
     );
   }
 
-  // Show auth screen if not authenticated
-  if (!isAuthenticated) {
-    return <AuthScreen />;
-  }
+  // Function to prompt for authentication
+  const promptAuth = (reason) => {
+    setAuthReason(reason);
+    setShowAuthModal(true);
+  };
 
   return (
     <div className="app">
@@ -245,23 +250,38 @@ function App() {
           )}
         </div>
         <div className="header-right">
-          <button className="btn btn-ghost btn-small" onClick={handleViewProgress}>
-            Progress
-          </button>
-          <div className="user-menu">
-            <UserIcon size={18} />
-            <span>{userData?.displayName || user?.email}</span>
-          </div>
-          <button className="btn btn-ghost btn-small" onClick={handleSignOut}>
-            <LogOut size={18} />
-          </button>
+          {isAuthenticated ? (
+            <>
+              <button className="btn btn-ghost btn-small" onClick={handleViewProgress}>
+                Progress
+              </button>
+              <div className="user-menu">
+                <UserIcon size={18} />
+                <span>{userData?.displayName || user?.email}</span>
+              </div>
+              <button className="btn btn-ghost btn-small" onClick={handleSignOut}>
+                <LogOut size={18} />
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="guest-indicator">Guest Mode</span>
+              <button className="btn btn-primary btn-small" onClick={() => setShowAuthModal(true)}>
+                Sign In / Sign Up
+              </button>
+            </>
+          )}
         </div>
       </header>
 
       {/* Main Content */}
       <main className="app-main">
         {appState === SIM_STATES.SCENARIO_SELECT && (
-          <ScenarioSelect onSelectScenario={handleSelectScenario} />
+          <ScenarioSelect 
+            onSelectScenario={handleSelectScenario}
+            isGuest={isGuest}
+            onAuthRequired={promptAuth}
+          />
         )}
 
         {appState === SIM_STATES.PROGRESS_VIEW && (
@@ -300,6 +320,8 @@ function App() {
             scenario={selectedScenario}
             onBackHome={handleBackHome}
             onRerunScenario={handleRerunScenario}
+            isGuest={isGuest}
+            onAuthRequired={promptAuth}
           />
         )}
 
@@ -310,6 +332,21 @@ function App() {
           </div>
         )}
       </main>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="modal-overlay" onClick={() => setShowAuthModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowAuthModal(false)}>×</button>
+            {authReason && (
+              <div className="auth-reason">
+                <p><strong>Sign in required:</strong> {authReason}</p>
+              </div>
+            )}
+            <AuthScreen onClose={() => setShowAuthModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

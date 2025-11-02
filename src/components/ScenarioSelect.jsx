@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { SCENARIO_TEMPLATES, CUSTOM_SCENARIO_TEMPLATE } from '../constants/scenarios';
 import { Play, Plus, Target, TrendingUp, Users } from 'lucide-react';
 
-export default function ScenarioSelect({ onSelectScenario }) {
+export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequired }) {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [customScenario, setCustomScenario] = useState({ ...CUSTOM_SCENARIO_TEMPLATE });
@@ -19,6 +19,12 @@ export default function ScenarioSelect({ onSelectScenario }) {
   };
 
   const handleCreateCustom = () => {
+    // Check if user is a guest and require authentication
+    if (isGuest && onAuthRequired) {
+      onAuthRequired('To create custom scenarios, you need to have an account');
+      return;
+    }
+    
     setShowCustomForm(true);
     setSelectedTemplate(null);
     setCustomScenario({ ...CUSTOM_SCENARIO_TEMPLATE });
@@ -60,6 +66,12 @@ export default function ScenarioSelect({ onSelectScenario }) {
       <div className="scenario-header">
         <h1>Choose Your Scenario</h1>
         <p>Select a workplace situation to practice, or create your own custom scenario</p>
+        {isGuest && (
+          <div className="guest-info-banner">
+            👋 Welcome! You can try all pre-written scenarios without an account. 
+            Sign up to save your progress and create custom scenarios.
+          </div>
+        )}
       </div>
 
       <div className="scenario-templates">

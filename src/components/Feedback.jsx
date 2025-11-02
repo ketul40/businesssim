@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TrendingUp, Award, AlertTriangle, Target, ArrowRight, Home } from 'lucide-react';
 import { getScoreLabel } from '../constants/rubrics';
 
-export default function Feedback({ evaluation, scenario, onBackHome, onRerunScenario }) {
+export default function Feedback({ evaluation, scenario, onBackHome, onRerunScenario, isGuest, onAuthRequired }) {
   const [activeSection, setActiveSection] = useState('overview');
   
   if (!evaluation) {
@@ -21,6 +21,17 @@ export default function Feedback({ evaluation, scenario, onBackHome, onRerunScen
       <div className="feedback-header">
         <h1>Your Performance Report</h1>
         <p className="scenario-title">{scenario.title}</p>
+        {isGuest && (
+          <div className="guest-feedback-banner">
+            <p>📊 Great job! Sign up to save this report and track your progress over time.</p>
+            <button 
+              className="btn btn-primary btn-small"
+              onClick={() => onAuthRequired && onAuthRequired('To save your performance reports and track improvement over time')}
+            >
+              Sign Up to Save Progress
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="feedback-nav">

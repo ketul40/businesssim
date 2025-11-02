@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '../firebase/auth';
 import { Target, Mail, Lock, User } from 'lucide-react';
 
-export default function AuthScreen() {
+export default function AuthScreen({ onClose }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +21,8 @@ export default function AuthScreen() {
       } else {
         await signInWithEmail(email, password);
       }
+      // Close modal on successful auth
+      if (onClose) onClose();
     } catch (err) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -34,6 +36,8 @@ export default function AuthScreen() {
 
     try {
       await signInWithGoogle();
+      // Close modal on successful auth
+      if (onClose) onClose();
     } catch (err) {
       setError(err.message || 'Google sign-in failed');
     } finally {

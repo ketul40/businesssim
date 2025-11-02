@@ -14,6 +14,8 @@
 
 /* eslint-disable max-len */
 
+require("dotenv").config();
+
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const OpenAI = require("openai");
@@ -25,24 +27,55 @@ admin.initializeApp();
  * @return {OpenAI} OpenAI instance
  */
 function getOpenAI() {
+  // Try multiple sources for the API key
+  const apiKey = process.env.OPENAI_API_KEY ||
+                 functions.config()?.openai?.key;
+
+  if (!apiKey) {
+    console.error("OpenAI API key not found in environment or config");
+    console.error("process.env.OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "EXISTS" : "NOT SET");
+    console.error("functions.config().openai?.key:", functions.config()?.openai?.key ? "EXISTS" : "NOT SET");
+    throw new Error("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.");
+  }
+
+  console.log("OpenAI API key found, initializing...");
   return new OpenAI({
-    apiKey: functions.config().openai?.key || process.env.OPENAI_API_KEY,
+    apiKey: apiKey,
   });
 }
 
 /**
  * Simulate stakeholder response during role-play
  */
-exports.simulateStakeholder = functions.https.onCall(async (data, context) => {
-  // Verify authentication
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-        "unauthenticated",
-        "Must be authenticated to use this function",
-    );
-  }
+exports.simulateStakeholder = functions.https.onCall(async (request) => {
+  // Allow both authenticated and guest users
+  // Guest users can use the simulation but won't have data saved
+
+  // Gen 2 functions receive data differently
+  const data = request.data || request;
+
+  console.log("Raw request received:", typeof request, Object.keys(request));
+  console.log("Data extracted:", typeof data, data ? Object.keys(data) : "null");
 
   const {scenario, transcript, userMessage} = data;
+
+  // Debug logging
+  console.log("Received data:", {
+    hasScenario: !!scenario,
+    scenarioKeys: scenario ? Object.keys(scenario) : "N/A",
+    hasTranscript: !!transcript,
+    hasUserMessage: !!userMessage,
+  });
+
+  if (!scenario) {
+    console.error("Scenario is missing from request data");
+    throw new functions.https.HttpsError("invalid-argument", "Scenario data is required");
+  }
+
+  if (!scenario.stakeholders || scenario.stakeholders.length === 0) {
+    console.error("Scenario is missing stakeholders:", scenario);
+    throw new functions.https.HttpsError("invalid-argument", "Scenario must have at least one stakeholder");
+  }
 
   try {
     // Build the system prompt
@@ -61,10 +94,10 @@ exports.simulateStakeholder = functions.https.onCall(async (data, context) => {
     // Call OpenAI
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini", // Cost-effective and fast
       messages: messages,
-      max_tokens: 200,
-      temperature: 0.8,
+      max_tokens: 250,
+      temperature: 0.9, // More natural, varied responses
     });
 
     const response = completion.choices[0].message.content;
@@ -85,11 +118,10 @@ exports.simulateStakeholder = functions.https.onCall(async (data, context) => {
 /**
  * Get coaching hint during timeout
  */
-exports.getCoachingHint = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError("unauthenticated", "Must be authenticated");
-  }
+exports.getCoachingHint = functions.https.onCall(async (request) => {
+  // Allow both authenticated and guest users
 
+  const data = request.data || request;
   const {scenario, transcript} = data;
 
   try {
@@ -103,9 +135,9 @@ Coaching hint:`;
 
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [{role: "user", content: prompt}],
-      max_tokens: 100,
+      max_tokens: 120,
       temperature: 0.7,
     });
 
@@ -121,10 +153,12 @@ Coaching hint:`;
 /**
  * Evaluate session and provide detailed feedback
  */
-exports.evaluateSession = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError("unauthenticated", "Must be authenticated");
-  }
+exports.evaluateSession = functions.https.onCall(async (request) => {
+  // Allow both authenticated and guest users
+
+  const data = request.data || request;
+  // eslint-disable-next-line no-unused-vars
+  const context = request; // Used for auth checking in Firestore write
 
   const {sessionId, scenario, transcript, rubricId} = data;
 
@@ -143,37 +177,39 @@ exports.evaluateSession = functions.https.onCall(async (data, context) => {
     // Call OpenAI for evaluation
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o", // Use stronger model for evaluation
       messages: [
-        {role: "system", content: "You are an expert evaluator of business communication."},
+        {role: "system", content: "You are an expert evaluator of business communication. Provide detailed, actionable feedback."},
         {role: "user", content: evaluationPrompt},
       ],
-      max_tokens: 2000,
+      max_tokens: 2500,
       temperature: 0.7,
     });
 
     const evaluationText = completion.choices[0].message.content;
     const evaluation = parseEvaluation(evaluationText, rubric);
 
-    // Store evaluation in Firestore
-    const evaluationRef = await admin.firestore()
-        .collection("evaluations")
-        .add({
-          sessionId,
-          userId: context.auth.uid,
-          rubricId,
-          ...evaluation,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
+    // Store evaluation in Firestore only for authenticated users
+    if (context.auth && sessionId) {
+      const evaluationRef = await admin.firestore()
+          .collection("evaluations")
+          .add({
+            sessionId,
+            userId: context.auth.uid,
+            rubricId,
+            ...evaluation,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
 
-    // Update session with evaluation ID
-    await admin.firestore()
-        .collection("sessions")
-        .doc(sessionId)
-        .update({
-          evaluationId: evaluationRef.id,
-          state: "EVALUATED",
-        });
+      // Update session with evaluation ID
+      await admin.firestore()
+          .collection("sessions")
+          .doc(sessionId)
+          .update({
+            evaluationId: evaluationRef.id,
+            state: "EVALUATED",
+          });
+    }
 
     return evaluation;
   } catch (error) {
@@ -190,27 +226,36 @@ exports.evaluateSession = functions.https.onCall(async (data, context) => {
 function buildSimulationPrompt(scenario) {
   const stakeholder = scenario.stakeholders[0];
 
-  return `You are a realistic workplace stakeholder simulator. Stay in character as ${stakeholder.name}, ${stakeholder.role}.
+  return `You are roleplaying as ${stakeholder.name}, ${stakeholder.role} at a tech company.
 
-Personality: ${stakeholder.personality}
+ABOUT YOU:
+• Personality: ${stakeholder.personality}
+• Background: You've been in this role for 3 years and are known for being direct but fair
+• Communication style: Professional, asks probing questions, values specifics over generalities
+• Current mindset: Busy, slightly skeptical, but open to good ideas
 
-Key concerns: ${stakeholder.concerns.join(", ")}
+YOUR PRIORITIES & CONCERNS:
+Concerns: ${stakeholder.concerns.join(", ")}
 Motivations: ${stakeholder.motivations.join(", ")}
 
-Scenario: ${scenario.title}
-Situation: ${scenario.situation}
+TODAY'S MEETING:
+Context: ${scenario.situation}
+Your objective: Understand if this proposal is worth pursuing
 
-Constraints:
-${scenario.constraints.map((c) => `- ${c}`).join("\n")}
+CURRENT CONSTRAINTS YOU'RE MANAGING:
+${scenario.constraints.map((c) => `• ${c}`).join("\n")}
 
-Rules:
-1. Be concise (1-4 sentences per response)
-2. Surface realistic objections based on your concerns
-3. Adapt difficulty based on user performance
-4. Stay in character - no feedback during simulation
-5. Challenge assumptions and ask for specifics
+HOW TO ROLEPLAY:
+1. Respond naturally as a real person (1-4 sentences)
+2. React to what the user says - if they're vague, push for specifics; if they make a good point, acknowledge it
+3. Surface your concerns organically - don't list them all at once
+4. Occasionally show emotion (skepticism, interest, concern) through your tone
+5. Remember previous points in the conversation and reference them
+6. Don't break character or provide coaching/feedback
+7. If convinced by solid reasoning, you can warm up to the idea
+8. Use natural workplace language, including occasional: "Hmm," "I hear you, but..." "Walk me through..."
 
-Respond as ${stakeholder.name}:`;
+Stay fully in character as ${stakeholder.name}. Respond naturally to what the user just said:`;
 }
 
 /**
