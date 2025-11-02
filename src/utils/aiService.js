@@ -7,6 +7,7 @@ import { functions } from '../firebase/config';
 const simulateStakeholderFn = httpsCallable(functions, 'simulateStakeholder');
 const evaluateSessionFn = httpsCallable(functions, 'evaluateSession');
 const getCoachingHintFn = httpsCallable(functions, 'getCoachingHint');
+const getSuggestionsFn = httpsCallable(functions, 'getSuggestions');
 
 // Simulate stakeholder response
 export const getStakeholderResponse = async (sessionData, userMessage) => {
@@ -38,6 +39,15 @@ export const getCoachingHint = async (sessionData) => {
     turnCount: sessionData.turnCount
   });
   return result.data.hint;
+};
+
+// Get AI-powered conversation suggestions
+export const getSuggestions = async (sessionData) => {
+  const result = await getSuggestionsFn({
+    scenario: sessionData.scenario,
+    transcript: sessionData.transcript
+  });
+  return result.data.suggestions;
 };
 
 // Evaluate session performance

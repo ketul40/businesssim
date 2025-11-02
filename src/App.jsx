@@ -15,7 +15,7 @@ import ThemeToggle from './components/ThemeToggle';
 import { useAuth } from './hooks/useAuth';
 import { signOutUser } from './firebase/auth';
 import { createSession, updateSession } from './firebase/firestore';
-import { getStakeholderResponse, getCoachingHint, evaluateSession } from './utils/aiService';
+import { getStakeholderResponse, getCoachingHint, evaluateSession, getSuggestions } from './utils/aiService';
 
 // Constants
 import { SIM_STATES, SIDEBAR_TABS, MESSAGE_TYPES } from './constants/states';
@@ -32,6 +32,10 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [turnCount, setTurnCount] = useState(0);
   const [isAILoading, setIsAILoading] = useState(false);
+  
+  // Suggestions state
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
   
   // Sidebar state
   const [activeSidebarTab, setActiveSidebarTab] = useState(SIDEBAR_TABS.CONTEXT);
@@ -55,6 +59,7 @@ function App() {
     setTurnCount(0);
     setNotes('');
     setEvaluation(null);
+    setSuggestions([]);
     
     // Create session in Firebase if user is authenticated
     if (user) {
@@ -87,6 +92,7 @@ function App() {
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setTurnCount(turnCount + 1);
+    setSuggestions([]); // Clear suggestions after sending
     
     // Update session in Firebase
     if (currentSessionId) {
@@ -138,10 +144,34 @@ function App() {
     }
   };
 
+  // Handle getting suggestions
+  const handleGetSuggestions = async () => {
+    setIsSuggestionsLoading(true);
+    try {
+      const newSuggestions = await getSuggestions({
+        scenario: selectedScenario,
+        transcript: messages
+      });
+      setSuggestions(newSuggestions);
+    } catch (error) {
+      console.error('Error getting suggestions:', error);
+      // Show a simple error to user
+      const errorMessage = {
+        type: MESSAGE_TYPES.SYSTEM,
+        content: 'Unable to load suggestions. Please try again.',
+        timestamp: new Date().toISOString()
+      };
+      setMessages([...messages, errorMessage]);
+    } finally {
+      setIsSuggestionsLoading(false);
+    }
+  };
+
   // Handle timeout (coaching hint)
   const handleTimeout = async () => {
     setAppState(SIM_STATES.TIMEOUT);
     setIsAILoading(true);
+    setSuggestions([]); // Clear suggestions during timeout
     
     try {
       const hint = await getCoachingHint({
@@ -202,6 +232,7 @@ function App() {
     setTurnCount(0);
     setEvaluation(null);
     setCurrentSessionId(null);
+    setSuggestions([]);
   };
 
   // Handle rerun scenario
@@ -317,8 +348,11 @@ function App() {
                 onSendMessage={handleSendMessage}
                 onTimeout={handleTimeout}
                 onExit={handleExit}
+                onGetSuggestions={handleGetSuggestions}
                 turnCount={turnCount}
                 isLoading={isAILoading}
+                suggestions={suggestions}
+                isSuggestionsLoading={isSuggestionsLoading}
               />
             </div>
             <Sidebar

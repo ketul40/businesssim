@@ -151,6 +151,80 @@ Coaching hint:`;
 });
 
 /**
+ * Get AI-powered conversation suggestions
+ */
+exports.getSuggestions = functions.https.onCall(async (request) => {
+  // Allow both authenticated and guest users
+
+  const data = request.data || request;
+  const {scenario, transcript} = data;
+
+  try {
+    const stakeholder = scenario.stakeholders[0];
+
+    // Build context-aware prompt for suggestions
+    // eslint-disable-next-line max-len
+    const prompt = `You are a business communication coach helping someone navigate a conversation with ${stakeholder.name}, ${stakeholder.role}.
+
+Scenario: ${scenario.title}
+Situation: ${scenario.situation}
+User's Objective: ${scenario.objective}
+
+Stakeholder's concerns: ${stakeholder.concerns.join(", ")}
+Stakeholder's motivations: ${stakeholder.motivations.join(", ")}
+
+Conversation so far:
+${transcript.map((msg) => `${msg.type === "user" ? "User" : stakeholder.name}: ${msg.content}`).join("\n")}
+
+Based on this conversation, provide 3 short, effective response options the user could say next. Each suggestion should:
+- Be 1-2 sentences max
+- Address the stakeholder's concerns or build on the conversation
+- Demonstrate good communication practices
+- Be natural and conversational
+- Help move toward the user's objective
+
+Return ONLY a JSON array with 3 suggestions, no other text:
+["suggestion 1", "suggestion 2", "suggestion 3"]`;
+
+    const openai = getOpenAI();
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{role: "user", content: prompt}],
+      max_tokens: 250,
+      temperature: 0.8,
+    });
+
+    const responseText = completion.choices[0].message.content;
+
+    // Try to parse JSON response
+    try {
+      const suggestions = JSON.parse(responseText);
+      if (Array.isArray(suggestions) && suggestions.length > 0) {
+        return {suggestions: suggestions.slice(0, 3)};
+      }
+    } catch (parseError) {
+      console.warn("Could not parse suggestions as JSON, extracting manually");
+    }
+
+    // Fallback: extract suggestions from text
+    const lines = responseText.split("\n").filter((line) => line.trim());
+    const suggestions = lines
+        .map((line) => line.replace(/^[\d.\-*[\]"\s]+/, "").replace(/["]+$/, "").trim())
+        .filter((s) => s.length > 10)
+        .slice(0, 3);
+
+    if (suggestions.length === 0) {
+      throw new Error("No valid suggestions extracted");
+    }
+
+    return {suggestions};
+  } catch (error) {
+    console.error("Error in getSuggestions:", error);
+    throw new functions.https.HttpsError("internal", "Failed to generate suggestions");
+  }
+});
+
+/**
  * Evaluate session and provide detailed feedback
  */
 exports.evaluateSession = functions.https.onCall(async (request) => {

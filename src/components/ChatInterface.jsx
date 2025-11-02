@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, Clock, Users as UsersIcon, AlertCircle } from 'lucide-react';
+import { Send, Clock, Users as UsersIcon, AlertCircle, Lightbulb } from 'lucide-react';
 import { MESSAGE_TYPES } from '../constants/states';
 
 export default function ChatInterface({
@@ -8,8 +8,11 @@ export default function ChatInterface({
   onSendMessage,
   onTimeout,
   onExit,
+  onGetSuggestions,
   turnCount,
-  isLoading
+  isLoading,
+  suggestions,
+  isSuggestionsLoading
 }) {
   const [inputValue, setInputValue] = useState('');
   const [isTimeoutActive, setIsTimeoutActive] = useState(false);
@@ -42,6 +45,11 @@ export default function ChatInterface({
   const handleTimeout = () => {
     setIsTimeoutActive(true);
     onTimeout();
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setInputValue(suggestion);
+    inputRef.current?.focus();
   };
 
   const turnsRemaining = scenario.turnLimit - turnCount;
@@ -136,24 +144,59 @@ export default function ChatInterface({
           </div>
         ) : (
           <>
-            <textarea
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your response..."
-              rows={2}
-              disabled={isLoading}
-              className="chat-input"
-            />
-            <button
-              className="btn btn-primary btn-send"
-              onClick={handleSend}
-              disabled={!inputValue.trim() || isLoading}
-            >
-              <Send size={20} />
-              Send
-            </button>
+            {/* Suggestions Section */}
+            {suggestions && suggestions.length > 0 && (
+              <div className="suggestions-container">
+                <div className="suggestions-header">
+                  <Lightbulb size={16} />
+                  <span>AI Suggestions - Click to use:</span>
+                </div>
+                <div className="suggestions-list">
+                  {suggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      className="suggestion-chip"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      disabled={isLoading}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="input-row">
+              <textarea
+                ref={inputRef}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your response..."
+                rows={2}
+                disabled={isLoading}
+                className="chat-input"
+              />
+              <div className="input-actions">
+                <button
+                  className="btn btn-secondary btn-icon"
+                  onClick={onGetSuggestions}
+                  disabled={isLoading || isSuggestionsLoading || messages.length === 0}
+                  title="Get AI suggestions"
+                >
+                  <Lightbulb size={18} />
+                  {isSuggestionsLoading ? 'Loading...' : 'Hints'}
+                </button>
+                <button
+                  className="btn btn-primary btn-send"
+                  onClick={handleSend}
+                  disabled={!inputValue.trim() || isLoading}
+                >
+                  <Send size={20} />
+                  Send
+                </button>
+              </div>
+            </div>
           </>
         )}
       </div>
