@@ -2,7 +2,7 @@
   "name": "skillloop",
   "private": true,
   "version": "1.0.0",
-  "description": "SkillLoop - AI-powered workplace scenario practice platform for professional development",
+  "description": "SkillLoops - AI-powered workplace scenario practice platform for professional development",
   "type": "module",
   "scripts": {
     "dev": "vite",

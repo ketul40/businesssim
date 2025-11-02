@@ -1,4 +1,4 @@
-# SkillLoop 🎯
+# SkillLoops 🎯
 
 **AI-Powered Workplace Scenario Practice Platform**
 
@@ -8,7 +8,7 @@ Practice high-stakes workplace conversations with intelligent AI stakeholders, r
 
 ## 🌟 Overview
 
-SkillLoop lets you rehearse tough workplace situations through guided role-play with AI, then receive transparent, rubric-based feedback and targeted practice drills. Perfect for:
+SkillLoops lets you rehearse tough workplace situations through guided role-play with AI, then receive transparent, rubric-based feedback and targeted practice drills. Perfect for:
 
 - Preparing for high-stakes meetings
 - Convincing directors on project directions
@@ -111,7 +111,7 @@ SkillLoop lets you rehearse tough workplace situations through guided role-play 
 ## 🏗️ Project Structure
 
 ```
-SkillLoop/
+SkillLoops/
 ├── src/
 │   ├── components/          # React components
 │   │   ├── AuthScreen.jsx   # Authentication UI
@@ -385,4 +385,4 @@ For questions or issues:
 
 ---
 
-**Built with ❤️ by SkillLoop - Master workplace conversations**
+**Built with ❤️ by SkillLoops - Master workplace conversations**

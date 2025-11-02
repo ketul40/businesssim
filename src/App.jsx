@@ -283,7 +283,7 @@ function App() {
       <header className="app-header">
         <div className="header-left">
           <h1 className="app-title" onClick={handleBackHome} style={{ cursor: 'pointer' }}>
-            SkillLoop
+            SkillLoops
           </h1>
           {appState !== SIM_STATES.SCENARIO_SELECT && appState !== SIM_STATES.PROGRESS_VIEW && (
             <span className="header-subtitle">{selectedScenario?.title}</span>
