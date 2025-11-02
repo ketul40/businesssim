@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { SCENARIO_TEMPLATES, CUSTOM_SCENARIO_TEMPLATE } from '../constants/scenarios';
-import { Play, Plus, Target, TrendingUp, Users } from 'lucide-react';
+import { Play, Plus, Target, TrendingUp, Users, X } from 'lucide-react';
 
 export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequired }) {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -9,6 +9,11 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
 
   const handleTemplateSelect = (template) => {
     setSelectedTemplate(template);
+    setShowCustomForm(false);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedTemplate(null);
     setShowCustomForm(false);
   };
 
@@ -78,7 +83,7 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
         {SCENARIO_TEMPLATES.map((template) => (
           <div
             key={template.id}
-            className={`scenario-card ${selectedTemplate?.id === template.id ? 'selected' : ''}`}
+            className="scenario-card"
             onClick={() => handleTemplateSelect(template)}
           >
             <div className="scenario-card-header">
@@ -106,107 +111,161 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
         </div>
       </div>
 
+      {/* Scenario Details Modal */}
       {selectedTemplate && !showCustomForm && (
-        <div className="scenario-details">
-          <h2>{selectedTemplate.title}</h2>
-          <div className="detail-section">
-            <h4>Situation</h4>
-            <p>{selectedTemplate.situation}</p>
-          </div>
-          <div className="detail-section">
-            <h4>Your Objective</h4>
-            <p>{selectedTemplate.objective}</p>
-          </div>
-          <div className="detail-section">
-            <h4>Stakeholders</h4>
-            {selectedTemplate.stakeholders.map((stakeholder, idx) => (
-              <div key={idx} className="stakeholder-info">
-                <strong>{stakeholder.name}</strong> - {stakeholder.role}
-                <p className="stakeholder-personality">{stakeholder.personality}</p>
+        <div className="scenario-modal-overlay" onClick={handleCloseModal}>
+          <div className="scenario-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="scenario-modal-close" onClick={handleCloseModal}>
+              <X size={24} />
+            </button>
+            
+            <div className="scenario-modal-header">
+              <div className="scenario-modal-icon">
+                {getCategoryIcon(selectedTemplate.category)}
               </div>
-            ))}
-          </div>
-          <div className="detail-section">
-            <h4>Constraints</h4>
-            <ul>
-              {selectedTemplate.constraints.map((constraint, idx) => (
-                <li key={idx}>{constraint}</li>
-              ))}
-            </ul>
-          </div>
-          <button className="btn btn-primary btn-large" onClick={handleStartScenario}>
-            <Play size={20} />
-            Start Simulation
-          </button>
-        </div>
-      )}
+              <div>
+                <h2>{selectedTemplate.title}</h2>
+                <div className="scenario-modal-badges">
+                  <span
+                    className="difficulty-badge"
+                    style={{ backgroundColor: getDifficultyColor(selectedTemplate.difficulty) }}
+                  >
+                    {selectedTemplate.difficulty}
+                  </span>
+                  <span className="meta-badge">🎯 {selectedTemplate.turnLimit} turns</span>
+                  <span className="meta-badge">👥 {selectedTemplate.stakeholders.length} stakeholder{selectedTemplate.stakeholders.length > 1 ? 's' : ''}</span>
+                </div>
+              </div>
+            </div>
 
-      {showCustomForm && (
-        <div className="scenario-details custom-form">
-          <h2>Create Custom Scenario</h2>
-          <form onSubmit={handleCustomSubmit}>
-            <div className="form-group">
-              <label>Scenario Title *</label>
-              <input
-                type="text"
-                required
-                value={customScenario.title}
-                onChange={(e) => setCustomScenario({ ...customScenario, title: e.target.value })}
-                placeholder="E.g., Quarterly Planning with VP"
-              />
-            </div>
-            <div className="form-group">
-              <label>Situation *</label>
-              <textarea
-                required
-                value={customScenario.situation}
-                onChange={(e) => setCustomScenario({ ...customScenario, situation: e.target.value })}
-                placeholder="Describe the context and background..."
-                rows={3}
-              />
-            </div>
-            <div className="form-group">
-              <label>Your Objective *</label>
-              <textarea
-                required
-                value={customScenario.objective}
-                onChange={(e) => setCustomScenario({ ...customScenario, objective: e.target.value })}
-                placeholder="What are you trying to achieve?"
-                rows={2}
-              />
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Turn Limit</label>
-                <input
-                  type="number"
-                  min="5"
-                  max="20"
-                  value={customScenario.turnLimit}
-                  onChange={(e) => setCustomScenario({ ...customScenario, turnLimit: parseInt(e.target.value) })}
-                />
+            <div className="scenario-modal-body">
+              <div className="detail-section">
+                <h4>Situation</h4>
+                <p>{selectedTemplate.situation}</p>
               </div>
-              <div className="form-group">
-                <label>Rubric</label>
-                <select
-                  value={customScenario.rubricId}
-                  onChange={(e) => setCustomScenario({ ...customScenario, rubricId: e.target.value })}
-                >
-                  <option value="persuasion_director">Persuasion</option>
-                  <option value="monthly_business_review">Business Review</option>
-                </select>
+              <div className="detail-section">
+                <h4>Your Objective</h4>
+                <p>{selectedTemplate.objective}</p>
+              </div>
+              <div className="detail-section">
+                <h4>Stakeholders</h4>
+                {selectedTemplate.stakeholders.map((stakeholder, idx) => (
+                  <div key={idx} className="stakeholder-info">
+                    <strong>{stakeholder.name}</strong> - {stakeholder.role}
+                    <p className="stakeholder-personality">{stakeholder.personality}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="detail-section">
+                <h4>Constraints</h4>
+                <ul>
+                  {selectedTemplate.constraints.map((constraint, idx) => (
+                    <li key={idx}>{constraint}</li>
+                  ))}
+                </ul>
               </div>
             </div>
-            <div className="form-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowCustomForm(false)}>
+
+            <div className="scenario-modal-footer">
+              <button className="btn btn-secondary" onClick={handleCloseModal}>
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary">
+              <button className="btn btn-primary btn-large" onClick={handleStartScenario}>
                 <Play size={20} />
                 Start Simulation
               </button>
             </div>
-          </form>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Scenario Form Modal */}
+      {showCustomForm && (
+        <div className="scenario-modal-overlay" onClick={handleCloseModal}>
+          <div className="scenario-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="scenario-modal-close" onClick={handleCloseModal}>
+              <X size={24} />
+            </button>
+            
+            <div className="scenario-modal-header">
+              <div className="scenario-modal-icon">
+                <Plus size={32} />
+              </div>
+              <div>
+                <h2>Create Custom Scenario</h2>
+                <p style={{ opacity: 0.8, fontSize: '0.9rem', marginTop: '0.25rem' }}>
+                  Build your own workplace scenario
+                </p>
+              </div>
+            </div>
+
+            <div className="scenario-modal-body">
+              <form onSubmit={handleCustomSubmit} id="custom-scenario-form">
+                <div className="form-group">
+                  <label>Scenario Title *</label>
+                  <input
+                    type="text"
+                    required
+                    value={customScenario.title}
+                    onChange={(e) => setCustomScenario({ ...customScenario, title: e.target.value })}
+                    placeholder="E.g., Quarterly Planning with VP"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Situation *</label>
+                  <textarea
+                    required
+                    value={customScenario.situation}
+                    onChange={(e) => setCustomScenario({ ...customScenario, situation: e.target.value })}
+                    placeholder="Describe the context and background..."
+                    rows={3}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Your Objective *</label>
+                  <textarea
+                    required
+                    value={customScenario.objective}
+                    onChange={(e) => setCustomScenario({ ...customScenario, objective: e.target.value })}
+                    placeholder="What are you trying to achieve?"
+                    rows={2}
+                  />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Turn Limit</label>
+                    <input
+                      type="number"
+                      min="5"
+                      max="20"
+                      value={customScenario.turnLimit}
+                      onChange={(e) => setCustomScenario({ ...customScenario, turnLimit: parseInt(e.target.value) })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Rubric</label>
+                    <select
+                      value={customScenario.rubricId}
+                      onChange={(e) => setCustomScenario({ ...customScenario, rubricId: e.target.value })}
+                    >
+                      <option value="persuasion_director">Persuasion</option>
+                      <option value="monthly_business_review">Business Review</option>
+                    </select>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div className="scenario-modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                Cancel
+              </button>
+              <button type="submit" form="custom-scenario-form" className="btn btn-primary btn-large">
+                <Play size={20} />
+                Start Simulation
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

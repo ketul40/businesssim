@@ -160,7 +160,7 @@ export default function Sidebar({ scenario, activeTab, onTabChange, notes, onNot
               value={notes}
               onChange={(e) => onNotesChange(e.target.value)}
               placeholder="Take notes during the simulation..."
-              rows={20}
+              rows={15}
               className="notes-textarea"
             />
           </div>

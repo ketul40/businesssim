@@ -142,7 +142,7 @@ export default function ChatInterface({
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Type your response..."
-              rows={3}
+              rows={2}
               disabled={isLoading}
               className="chat-input"
             />
