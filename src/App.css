@@ -1024,6 +1024,31 @@
   margin-top: 1rem;
 }
 
+/* Stakeholder Form Styles */
+.stakeholder-form-group {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: var(--bg-secondary);
+}
+
+.stakeholder-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.stakeholder-form-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 /* ==================== SIMULATION LAYOUT ==================== */
 
 .simulation-layout {

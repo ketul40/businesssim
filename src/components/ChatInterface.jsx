@@ -132,7 +132,7 @@ export default function ChatInterface({
       <div className="chat-input-container">
         {turnsRemaining <= 0 ? (
           <div className="turn-limit-reached">
-            <p>Turn limit reached. Please exit to see your evaluation.</p>
+            <p>Turn limit reached. Generating your evaluation...</p>
           </div>
         ) : (
           <>

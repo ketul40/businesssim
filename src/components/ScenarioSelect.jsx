@@ -32,11 +32,39 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
     
     setShowCustomForm(true);
     setSelectedTemplate(null);
-    setCustomScenario({ ...CUSTOM_SCENARIO_TEMPLATE });
+    setCustomScenario({ ...CUSTOM_SCENARIO_TEMPLATE, stakeholders: [] });
+  };
+
+  const addStakeholder = () => {
+    setCustomScenario({
+      ...customScenario,
+      stakeholders: [
+        ...customScenario.stakeholders,
+        { name: '', role: '', relationshipType: 'stakeholder', personality: '', concerns: [], motivations: [] }
+      ]
+    });
+  };
+
+  const updateStakeholder = (index, field, value) => {
+    const updatedStakeholders = [...customScenario.stakeholders];
+    updatedStakeholders[index][field] = value;
+    setCustomScenario({ ...customScenario, stakeholders: updatedStakeholders });
+  };
+
+  const removeStakeholder = (index) => {
+    const updatedStakeholders = customScenario.stakeholders.filter((_, i) => i !== index);
+    setCustomScenario({ ...customScenario, stakeholders: updatedStakeholders });
   };
 
   const handleCustomSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate at least one stakeholder
+    if (customScenario.stakeholders.length === 0) {
+      alert('Please add at least one person to interact with');
+      return;
+    }
+    
     onSelectScenario(customScenario);
   };
 
@@ -64,6 +92,37 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
       default:
         return '#6b7280';
     }
+  };
+
+  const getRelationshipText = (stakeholders) => {
+    if (!stakeholders || stakeholders.length === 0) return '👥 No participants';
+    
+    // Count each type
+    const counts = {
+      stakeholder: 0,
+      direct_report: 0,
+      peer: 0
+    };
+    
+    stakeholders.forEach(s => {
+      if (s.relationshipType) {
+        counts[s.relationshipType]++;
+      }
+    });
+    
+    // Build text based on what's present
+    const parts = [];
+    if (counts.stakeholder > 0) {
+      parts.push(`${counts.stakeholder} stakeholder${counts.stakeholder > 1 ? 's' : ''}`);
+    }
+    if (counts.direct_report > 0) {
+      parts.push(`${counts.direct_report} direct report${counts.direct_report > 1 ? 's' : ''}`);
+    }
+    if (counts.peer > 0) {
+      parts.push(`${counts.peer} peer${counts.peer > 1 ? 's' : ''}`);
+    }
+    
+    return `👥 ${parts.join(', ')}`;
   };
 
   return (
@@ -99,7 +158,7 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
             <p className="scenario-description">{template.description}</p>
             <div className="scenario-meta">
               <span>🎯 {template.turnLimit} turns</span>
-              <span>👥 {template.stakeholders.length} stakeholder{template.stakeholders.length > 1 ? 's' : ''}</span>
+              <span>{getRelationshipText(template.stakeholders)}</span>
             </div>
           </div>
         ))}
@@ -133,7 +192,7 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
                     {selectedTemplate.difficulty}
                   </span>
                   <span className="meta-badge">🎯 {selectedTemplate.turnLimit} turns</span>
-                  <span className="meta-badge">👥 {selectedTemplate.stakeholders.length} stakeholder{selectedTemplate.stakeholders.length > 1 ? 's' : ''}</span>
+                  <span className="meta-badge">{getRelationshipText(selectedTemplate.stakeholders)}</span>
                 </div>
               </div>
             </div>
@@ -253,6 +312,91 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
                     </select>
                   </div>
                 </div>
+
+                <div className="form-group">
+                  <label>Who will you interact with? *</label>
+                  <p style={{ fontSize: '0.875rem', opacity: 0.7, marginBottom: '0.75rem' }}>
+                    Add the people you'll be talking to in this scenario
+                  </p>
+                  
+                  {customScenario.stakeholders.map((stakeholder, index) => (
+                    <div key={index} className="stakeholder-form-group">
+                      <div className="stakeholder-form-header">
+                        <h4>Person {index + 1}</h4>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-small"
+                          onClick={() => removeStakeholder(index)}
+                        >
+                          <X size={16} />
+                          Remove
+                        </button>
+                      </div>
+                      
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Name *</label>
+                          <input
+                            type="text"
+                            required
+                            value={stakeholder.name}
+                            onChange={(e) => updateStakeholder(index, 'name', e.target.value)}
+                            placeholder="E.g., Sarah Johnson"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Role *</label>
+                          <input
+                            type="text"
+                            required
+                            value={stakeholder.role}
+                            onChange={(e) => updateStakeholder(index, 'role', e.target.value)}
+                            placeholder="E.g., Senior Engineer"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Relationship Type *</label>
+                        <select
+                          required
+                          value={stakeholder.relationshipType}
+                          onChange={(e) => updateStakeholder(index, 'relationshipType', e.target.value)}
+                        >
+                          <option value="stakeholder">Stakeholder (Manager, Director, VP, etc.)</option>
+                          <option value="direct_report">Direct Report (Team Member)</option>
+                          <option value="peer">Peer (Colleague at same level)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Personality (Optional)</label>
+                        <input
+                          type="text"
+                          value={stakeholder.personality}
+                          onChange={(e) => updateStakeholder(index, 'personality', e.target.value)}
+                          placeholder="E.g., Analytical, detail-oriented, values data"
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-small"
+                    onClick={addStakeholder}
+                    style={{ marginTop: '0.5rem' }}
+                  >
+                    <Plus size={16} />
+                    Add Person
+                  </button>
+                  
+                  {customScenario.stakeholders.length === 0 && (
+                    <p style={{ fontSize: '0.875rem', color: '#ef4444', marginTop: '0.5rem' }}>
+                      You must add at least one person to interact with
+                    </p>
+                  )}
+                </div>
               </form>
             </div>
 
@@ -260,7 +404,12 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
               <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
                 Cancel
               </button>
-              <button type="submit" form="custom-scenario-form" className="btn btn-primary btn-large">
+              <button 
+                type="submit" 
+                form="custom-scenario-form" 
+                className="btn btn-primary btn-large"
+                disabled={customScenario.stakeholders.length === 0}
+              >
                 <Play size={20} />
                 Start Simulation
               </button>

@@ -40,6 +40,14 @@ function App() {
   // Evaluation state
   const [evaluation, setEvaluation] = useState(null);
 
+  // Auto-exit when turn limit is reached
+  useEffect(() => {
+    if (selectedScenario && turnCount >= selectedScenario.turnLimit && appState === SIM_STATES.IN_SIM) {
+      // Automatically trigger evaluation when turn limit is reached
+      handleExit();
+    }
+  }, [turnCount, selectedScenario, appState]);
+
   // Handle scenario selection
   const handleSelectScenario = async (scenario) => {
     setSelectedScenario(scenario);
