@@ -284,6 +284,13 @@ function App() {
         </div>
       </header>
 
+      {/* Guest Info Banner */}
+      {isGuest && (
+        <div className="guest-info-banner-header">
+          👋 <strong>Guest Mode</strong> — Try any scenario for free. Sign up to save progress and create custom scenarios.
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="app-main">
         {appState === SIM_STATES.SCENARIO_SELECT && (

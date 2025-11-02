@@ -127,15 +127,33 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
 
   return (
     <div className="scenario-select">
-      <div className="scenario-header">
-        <h1>Choose Your Scenario</h1>
-        <p>Select a workplace situation to practice, or create your own custom scenario</p>
-        {isGuest && (
-          <div className="guest-info-banner">
-            👋 Welcome! You can try all pre-written scenarios without an account. 
-            Sign up to save your progress and create custom scenarios.
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">Master Workplace Communication Through AI-Powered Simulations</h1>
+          <p className="hero-subtitle">
+            Navigate tough conversations, pitch ideas to skeptical stakeholders, and handle difficult team situations—all in a safe environment where you can practice, learn, and grow without the pressure.
+          </p>
+          <div className="hero-features">
+            <div className="hero-feature">
+              <h3>Realistic AI Conversations</h3>
+              <p>Practice with AI that responds naturally and challenges you—just like real stakeholders would</p>
+            </div>
+            <div className="hero-feature">
+              <h3>Learn From Every Interaction</h3>
+              <p>Get detailed feedback on what worked, what didn't, and exactly how to improve</p>
+            </div>
+            <div className="hero-feature">
+              <h3>See Your Growth</h3>
+              <p>Watch your communication skills improve as you tackle more scenarios and challenges</p>
+            </div>
           </div>
-        )}
+        </div>
+      </div>
+
+      <div className="scenario-header">
+        <h1>Ready to Practice?</h1>
+        <p>Pick a scenario below to start your simulation, or build your own custom challenge</p>
       </div>
 
       <div className="scenario-templates">
