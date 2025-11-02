@@ -59,28 +59,28 @@
 
 /* Light Mode */
 [data-theme="light"] {
-  --bg-primary: #f9fafb;
+  --bg-primary: #f5f6fa;
   --bg-secondary: #ffffff;
-  --bg-tertiary: var(--city-lights);
+  --bg-tertiary: #e8eaf0;
   --bg-elevated: #ffffff;
   
-  --text-primary: var(--dracula-orchid);
-  --text-secondary: var(--american-river);
-  --text-tertiary: var(--soothing-breeze);
+  --text-primary: #2d3436;
+  --text-secondary: #636e72;
+  --text-tertiary: #b2bec3;
   
-  --border-color: rgba(0, 0, 0, 0.1);
-  --border-hover: rgba(0, 0, 0, 0.2);
+  --border-color: rgba(45, 52, 54, 0.15);
+  --border-hover: rgba(45, 52, 54, 0.3);
   
   --primary-color: var(--electron-blue);
-  --primary-hover: var(--green-darner-tail);
+  --primary-hover: #0770c4;
   --accent-color: var(--exodus-fruit);
   --success-color: var(--mint-leaf);
   --warning-color: var(--orangeville);
   --danger-color: var(--chi-gong);
   
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 2px 8px rgba(45, 52, 54, 0.08);
+  --shadow-md: 0 4px 16px rgba(45, 52, 54, 0.12);
+  --shadow-lg: 0 8px 32px rgba(45, 52, 54, 0.16);
 }
 
 /* Initialize with dark theme by default */

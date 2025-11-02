@@ -404,19 +404,20 @@
 }
 
 .scenario-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
   border-radius: 12px;
   padding: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .scenario-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(100, 108, 255, 0.5);
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 24px rgba(100, 108, 255, 0.2);
+  border-color: var(--primary-color);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-md);
   cursor: pointer;
 }
 
@@ -425,8 +426,8 @@
 }
 
 .scenario-card.selected {
-  border-color: #646cff;
-  background: rgba(100, 108, 255, 0.1);
+  border-color: var(--primary-color);
+  background: var(--bg-elevated);
 }
 
 .scenario-card-header {
@@ -451,12 +452,12 @@
 
 .scenario-card h3 {
   margin-bottom: 0.5rem;
-  color: white;
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
 .scenario-description {
-  opacity: 0.8;
+  color: var(--text-secondary);
   margin-bottom: 0.75rem;
   line-height: 1.4;
   font-size: 0.85rem;
@@ -466,7 +467,7 @@
   display: flex;
   gap: 0.75rem;
   font-size: 0.8rem;
-  opacity: 0.7;
+  color: var(--text-tertiary);
 }
 
 .custom-card {
@@ -750,9 +751,9 @@
 .form-group select {
   padding: 0.75rem;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 1rem;
   font-family: inherit;
 }
@@ -761,7 +762,7 @@
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #646cff;
+  border-color: var(--primary-color);
 }
 
 .form-row {
@@ -798,13 +799,13 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-primary);
 }
 
 .chat-header {
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .chat-title {
@@ -817,6 +818,7 @@
 .chat-title h2 {
   font-size: 1.1rem;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .turn-counter {
@@ -839,8 +841,8 @@
 }
 
 .message {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.75rem;
   animation: slideIn 0.3s ease-out;
@@ -952,9 +954,9 @@
   flex: 1;
   padding: 0.5rem;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-family: inherit;
   resize: vertical;
@@ -963,7 +965,7 @@
 
 .chat-input:focus {
   outline: none;
-  border-color: #646cff;
+  border-color: var(--primary-color);
 }
 
 .btn-send {
@@ -983,8 +985,8 @@
 /* ==================== SIDEBAR ==================== */
 
 .sidebar {
-  background: rgba(255, 255, 255, 0.03);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -993,8 +995,8 @@
 
 .sidebar-tabs {
   display: flex;
-  background: rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
   padding: 0;
 }
 
@@ -1003,7 +1005,7 @@
   padding: 0.6rem;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-tertiary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1016,9 +1018,9 @@
 }
 
 .sidebar-tab.active {
-  color: white;
-  background: rgba(100, 108, 255, 0.1);
-  border-bottom-color: #646cff;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border-bottom-color: var(--primary-color);
 }
 
 .sidebar-content {
@@ -1031,7 +1033,7 @@
 .rubric-panel h3,
 .notes-panel h3 {
   margin-bottom: 0.75rem;
-  color: #646cff;
+  color: var(--primary-color);
   font-size: 1rem;
 }
 
@@ -1054,8 +1056,8 @@
 }
 
 .stakeholder-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.75rem;
   margin-bottom: 0.75rem;
@@ -1067,6 +1069,7 @@
   align-items: center;
   margin-bottom: 0.4rem;
   font-size: 0.9rem;
+  color: var(--text-primary);
 }
 
 .role-tag {
@@ -1202,9 +1205,9 @@
   min-height: 300px;
   padding: 0.75rem;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  border: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   font-size: 0.85rem;
   font-family: inherit;
   resize: vertical;
@@ -1212,7 +1215,7 @@
 
 .notes-textarea:focus {
   outline: none;
-  border-color: #646cff;
+  border-color: var(--primary-color);
 }
 
 /* ==================== FEEDBACK ==================== */
@@ -1972,11 +1975,13 @@
 .guest-info-banner {
   margin-top: 1rem;
   padding: 1rem 1.5rem;
-  background: rgba(100, 108, 255, 0.1);
-  border: 1px solid rgba(100, 108, 255, 0.3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   text-align: center;
   font-size: 0.95rem;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .guest-banner {
