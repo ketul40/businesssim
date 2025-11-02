@@ -5,7 +5,9 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* ==================== APP HEADER ==================== */
@@ -15,9 +17,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-tertiary);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -32,7 +34,7 @@
 .app-title {
   font-size: 1.2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -54,14 +56,40 @@
   gap: 0.5rem;
 }
 
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
+}
+
+.theme-toggle:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
 .user-menu {
   display: flex;
   align-items: center;
   gap: 0.4rem;
   padding: 0.3rem 0.7rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-tertiary);
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
   font-size: 0.85rem;
 }
 
@@ -100,43 +128,45 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(100, 108, 255, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(100, 108, 255, 0.6);
+  box-shadow: var(--shadow-lg);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
 }
 
 .btn-warning {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(214, 48, 49, 0.1);
+  color: var(--danger-color);
+  border: 1px solid rgba(214, 48, 49, 0.3);
 }
 
 .btn-warning:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(214, 48, 49, 0.2);
 }
 
 .btn-ghost {
   background: transparent;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .btn-google {

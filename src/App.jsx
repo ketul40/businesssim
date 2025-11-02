@@ -9,6 +9,7 @@ import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
 import Feedback from './components/Feedback';
 import ProgressDashboard from './components/ProgressDashboard';
+import ThemeToggle from './components/ThemeToggle';
 
 // Hooks and utils
 import { useAuth } from './hooks/useAuth';
@@ -250,6 +251,7 @@ function App() {
           )}
         </div>
         <div className="header-right">
+          <ThemeToggle />
           {isAuthenticated ? (
             <>
               <button className="btn btn-ghost btn-small" onClick={handleViewProgress}>
