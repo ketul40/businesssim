@@ -1,8 +1,8 @@
 {
-  "name": "businesssim",
+  "name": "skillloop",
   "private": true,
   "version": "1.0.0",
-  "description": "AI-powered business scenario simulator for workplace rehearsal and feedback",
+  "description": "SkillLoop - AI-powered workplace scenario practice platform for professional development",
   "type": "module",
   "scripts": {
     "dev": "vite",

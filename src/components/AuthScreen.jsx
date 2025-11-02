@@ -52,7 +52,7 @@ export default function AuthScreen({ onClose }) {
           <div className="auth-logo">
             <Target size={40} />
           </div>
-          <h1>BusinessSim</h1>
+          <h1>SkillLoop</h1>
           <p>Practice workplace scenarios with AI feedback</p>
         </div>
 

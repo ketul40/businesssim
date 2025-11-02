@@ -1,6 +1,6 @@
-# BusinessSim 🎯
+# SkillLoop 🎯
 
-**AI-Powered Workplace Scenario Simulator**
+**AI-Powered Workplace Scenario Practice Platform**
 
 Practice high-stakes workplace conversations with intelligent AI stakeholders, receive rubric-based feedback, and develop critical business communication skills.
 
@@ -8,7 +8,7 @@ Practice high-stakes workplace conversations with intelligent AI stakeholders, r
 
 ## 🌟 Overview
 
-BusinessSim lets you rehearse tough workplace situations through guided role-play with AI, then receive transparent, rubric-based feedback and targeted practice drills. Perfect for:
+SkillLoop lets you rehearse tough workplace situations through guided role-play with AI, then receive transparent, rubric-based feedback and targeted practice drills. Perfect for:
 
 - Preparing for high-stakes meetings
 - Convincing directors on project directions
@@ -70,7 +70,7 @@ BusinessSim lets you rehearse tough workplace situations through guided role-pla
 1. **Clone the repository**
    ```bash
    git clone https://github.com/ketul40/businesssim.git
-   cd businesssim
+   cd skillloop
    ```
 
 2. **Install dependencies**
@@ -111,7 +111,7 @@ BusinessSim lets you rehearse tough workplace situations through guided role-pla
 ## 🏗️ Project Structure
 
 ```
-BusinessSim/
+SkillLoop/
 ├── src/
 │   ├── components/          # React components
 │   │   ├── AuthScreen.jsx   # Authentication UI
@@ -385,4 +385,4 @@ For questions or issues:
 
 ---
 
-**Built with ❤️ for better business communication**
+**Built with ❤️ by SkillLoop - Master workplace conversations**
