@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { useSimulation } from './useSimulation';
 import { updateSession } from '../firebase/firestore';
 import { getStakeholderResponse, getCoachingHint, evaluateSession } from '../utils/aiService';
@@ -59,7 +59,9 @@ describe('useSimulation', () => {
       })
     );
 
-    await result.current.sendMessage('Hello');
+    await act(async () => {
+      await result.current.sendMessage('Hello');
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -90,7 +92,9 @@ describe('useSimulation', () => {
       })
     );
 
-    await result.current.sendMessage('Test message');
+    await act(async () => {
+      await result.current.sendMessage('Test message');
+    });
 
     await waitFor(() => {
       expect(updateSession).toHaveBeenCalled();
@@ -115,7 +119,9 @@ describe('useSimulation', () => {
       })
     );
 
-    await result.current.sendMessage('Hello');
+    await act(async () => {
+      await result.current.sendMessage('Hello');
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -137,7 +143,9 @@ describe('useSimulation', () => {
       })
     );
 
-    await result.current.requestTimeout();
+    await act(async () => {
+      await result.current.requestTimeout();
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -166,7 +174,9 @@ describe('useSimulation', () => {
       })
     );
 
-    await result.current.exitSimulation();
+    await act(async () => {
+      await result.current.exitSimulation();
+    });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -199,8 +209,9 @@ describe('useSimulation', () => {
       })
     );
 
-    // Add some messages first
-    result.current.clearMessages();
+    act(() => {
+      result.current.clearMessages();
+    });
 
     expect(result.current.messages).toEqual([]);
     expect(result.current.turnCount).toBe(0);
