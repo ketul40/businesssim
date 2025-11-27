@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { SCENARIO_TEMPLATES, CUSTOM_SCENARIO_TEMPLATE } from '../constants/scenarios';
 import { Play, Plus, Target, TrendingUp, Users, X } from 'lucide-react';
 
-export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequired }) {
+const ScenarioSelect = memo(function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequired }) {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [customScenario, setCustomScenario] = useState({ ...CUSTOM_SCENARIO_TEMPLATE });
@@ -437,5 +437,6 @@ export default function ScenarioSelect({ onSelectScenario, isGuest, onAuthRequir
       )}
     </div>
   );
-}
+});
 
+export default ScenarioSelect;

@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { TrendingUp, Award, Clock, Target, ArrowRight } from 'lucide-react';
 import { getUserSessions } from '../firebase/firestore';
 
-export default function ProgressDashboard({ userId, onStartNewScenario }) {
+const ProgressDashboard = memo(function ProgressDashboard({ userId, onStartNewScenario }) {
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState({
     totalSessions: 0,
@@ -185,5 +185,6 @@ export default function ProgressDashboard({ userId, onStartNewScenario }) {
       </div>
     </div>
   );
-}
+});
 
+export default ProgressDashboard;

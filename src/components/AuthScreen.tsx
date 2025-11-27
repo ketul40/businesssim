@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - auth.js doesn't have type definitions
 import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '../firebase/auth';
 import { Target, Mail, Lock, User } from 'lucide-react';
+import { AuthScreenProps } from '../types/props';
 
-export default function AuthScreen({ onClose }) {
+export default function AuthScreen({ onClose }: AuthScreenProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -10,7 +13,7 @@ export default function AuthScreen({ onClose }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -24,7 +27,8 @@ export default function AuthScreen({ onClose }) {
       // Close modal on successful auth
       if (onClose) onClose();
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -39,7 +43,8 @@ export default function AuthScreen({ onClose }) {
       // Close modal on successful auth
       if (onClose) onClose();
     } catch (err) {
-      setError(err.message || 'Google sign-in failed');
+      const errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -160,4 +165,3 @@ export default function AuthScreen({ onClose }) {
     </div>
   );
 }
-

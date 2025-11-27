@@ -1,52 +1,68 @@
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { FileText, Target, StickyNote, Upload, X } from 'lucide-react';
 import { SIDEBAR_TABS } from '../constants/states';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - rubrics.js doesn't have type definitions
 import { RUBRICS } from '../constants/rubrics';
+import { SidebarProps } from '../types/props';
 
-export default function Sidebar({ scenario, activeTab, onTabChange, notes, onNotesChange, onFileUpload }) {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+export default function Sidebar({ scenario, activeTab, onTabChange, notes, onNotesChange, onFileUpload }: SidebarProps) {
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
-  const rubric = RUBRICS[scenario.rubricId.toUpperCase()] || RUBRICS.PERSUASION_DIRECTOR;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rubric: any = RUBRICS[scenario.rubricId.toUpperCase()] || RUBRICS.PERSUASION_DIRECTOR;
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
     setUploadedFiles([...uploadedFiles, ...files]);
     if (onFileUpload) {
       files.forEach(file => onFileUpload(file));
     }
   };
 
-  const removeFile = (index) => {
+  const removeFile = (index: number) => {
     setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
   };
 
   return (
     <div className="sidebar">
-      <div className="sidebar-tabs">
+      <div className="sidebar-tabs" role="tablist" aria-label="Sidebar navigation">
         <button
           className={`sidebar-tab ${activeTab === SIDEBAR_TABS.CONTEXT ? 'active' : ''}`}
           onClick={() => onTabChange(SIDEBAR_TABS.CONTEXT)}
+          role="tab"
+          aria-selected={activeTab === SIDEBAR_TABS.CONTEXT}
+          aria-controls="sidebar-content"
+          aria-label="Context tab"
         >
-          <FileText size={18} />
+          <FileText size={18} aria-hidden="true" />
           Context
         </button>
         <button
           className={`sidebar-tab ${activeTab === SIDEBAR_TABS.RUBRIC ? 'active' : ''}`}
           onClick={() => onTabChange(SIDEBAR_TABS.RUBRIC)}
+          role="tab"
+          aria-selected={activeTab === SIDEBAR_TABS.RUBRIC}
+          aria-controls="sidebar-content"
+          aria-label="Rubric tab"
         >
-          <Target size={18} />
+          <Target size={18} aria-hidden="true" />
           Rubric
         </button>
         <button
           className={`sidebar-tab ${activeTab === SIDEBAR_TABS.NOTES ? 'active' : ''}`}
           onClick={() => onTabChange(SIDEBAR_TABS.NOTES)}
+          role="tab"
+          aria-selected={activeTab === SIDEBAR_TABS.NOTES}
+          aria-controls="sidebar-content"
+          aria-label="Notes tab"
         >
-          <StickyNote size={18} />
+          <StickyNote size={18} aria-hidden="true" />
           Notes
         </button>
       </div>
 
-      <div className="sidebar-content">
+      <div className="sidebar-content" id="sidebar-content" role="tabpanel" aria-label={`${activeTab} panel`}>
         {activeTab === SIDEBAR_TABS.CONTEXT && (
           <div className="context-panel">
             <h3>Scenario Context</h3>
@@ -94,24 +110,30 @@ export default function Sidebar({ scenario, activeTab, onTabChange, notes, onNot
             <div className="context-section">
               <h4>Upload Context Files</h4>
               <p className="help-text">Add slides, KPIs, or documents for AI reference</p>
-              <label className="file-upload-btn">
-                <Upload size={16} />
+              <label className="file-upload-btn" htmlFor="file-upload-input">
+                <Upload size={16} aria-hidden="true" />
                 Choose Files
                 <input
+                  id="file-upload-input"
                   type="file"
                   multiple
                   accept=".pdf,.pptx,.ppt,.csv,.xlsx,.xls,.txt,.md"
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
+                  aria-label="Upload context files"
                 />
               </label>
               {uploadedFiles.length > 0 && (
-                <div className="uploaded-files">
+                <div className="uploaded-files" role="list" aria-label="Uploaded files">
                   {uploadedFiles.map((file, idx) => (
-                    <div key={idx} className="uploaded-file">
+                    <div key={idx} className="uploaded-file" role="listitem">
                       <span>{file.name}</span>
-                      <button onClick={() => removeFile(idx)} className="btn-icon">
-                        <X size={14} />
+                      <button 
+                        onClick={() => removeFile(idx)} 
+                        className="btn-icon"
+                        aria-label={`Remove ${file.name}`}
+                      >
+                        <X size={14} aria-hidden="true" />
                       </button>
                     </div>
                   ))}
@@ -126,7 +148,7 @@ export default function Sidebar({ scenario, activeTab, onTabChange, notes, onNot
             <h3>{rubric.name}</h3>
             <p className="help-text">You'll be evaluated on these criteria after the simulation</p>
             
-            {rubric.criteria.map((criterion, idx) => (
+            {rubric.criteria.map((criterion: any, idx: number) => (
               <div key={idx} className="rubric-criterion">
                 <div className="criterion-header">
                   <h4>{criterion.name}</h4>
@@ -156,12 +178,17 @@ export default function Sidebar({ scenario, activeTab, onTabChange, notes, onNot
           <div className="notes-panel">
             <h3>Your Notes</h3>
             <p className="help-text">Jot down thoughts, key points, or reminders</p>
+            <label htmlFor="notes-textarea" className="visually-hidden">
+              Your notes
+            </label>
             <textarea
+              id="notes-textarea"
               value={notes}
               onChange={(e) => onNotesChange(e.target.value)}
               placeholder="Take notes during the simulation..."
               rows={15}
               className="notes-textarea"
+              aria-label="Notes textarea"
             />
           </div>
         )}
@@ -169,4 +196,3 @@ export default function Sidebar({ scenario, activeTab, onTabChange, notes, onNot
     </div>
   );
 }
-

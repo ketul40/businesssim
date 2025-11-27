@@ -49,9 +49,10 @@ SkillLoops lets you rehearse tough workplace situations through guided role-play
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React 18 + Vite
+- **Frontend**: React 18 + Vite + TypeScript
 - **Backend**: Firebase (Firestore, Auth, Storage, Functions)
 - **AI**: OpenAI API (via Firebase Functions)
+- **Testing**: Vitest + React Testing Library + fast-check (Property-Based Testing)
 - **Styling**: Custom CSS with modern gradients and animations
 - **Icons**: Lucide React
 
@@ -61,9 +62,10 @@ SkillLoops lets you rehearse tough workplace situations through guided role-play
 
 ### Prerequisites
 
-- Node.js 16+ 
+- Node.js 18+ 
 - npm or yarn
 - Firebase account (for backend services)
+- TypeScript 5.0+ (included in dependencies)
 
 ### Quick Start
 
@@ -108,44 +110,109 @@ SkillLoops lets you rehearse tough workplace situations through guided role-play
 
 ---
 
+## 🧪 Testing
+
+### Running Tests
+
+The project includes comprehensive unit tests, integration tests, and property-based tests:
+
+```bash
+# Run all tests once
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with UI
+npm run test:ui
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### Test Structure
+
+- **Unit Tests**: Test individual components and functions
+- **Integration Tests**: Test complete user flows
+- **Property-Based Tests**: Verify correctness properties across many inputs
+
+See [TESTING.md](./docs/TESTING.md) for detailed testing documentation.
+
+### TypeScript Type Checking
+
+```bash
+# Check types without emitting files
+npm run type-check
+```
+
+---
+
 ## 🏗️ Project Structure
 
 ```
 SkillLoops/
 ├── src/
-│   ├── components/          # React components
-│   │   ├── AuthScreen.jsx   # Authentication UI
-│   │   ├── ScenarioSelect.jsx
-│   │   ├── ChatInterface.jsx
-│   │   ├── Sidebar.jsx
-│   │   ├── Feedback.jsx
-│   │   └── ProgressDashboard.jsx
+│   ├── components/          # React components (TypeScript)
+│   │   ├── AuthScreen.tsx   # Authentication UI
+│   │   ├── ScenarioSelect.tsx
+│   │   ├── ChatInterface.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── Feedback.tsx
+│   │   ├── ProgressDashboard.tsx
+│   │   ├── ErrorBoundary.tsx
+│   │   └── *.test.tsx       # Component tests
 │   │
 │   ├── constants/           # App constants
-│   │   ├── scenarios.js     # Scenario templates
+│   │   ├── scenarios.ts     # Scenario templates
 │   │   ├── rubrics.js       # Evaluation rubrics
-│   │   └── states.js        # State machine
+│   │   └── states.ts        # State machine
 │   │
-│   ├── firebase/            # Firebase integration
-│   │   ├── config.js        # Firebase initialization
+│   ├── firebase/            # Firebase integration (TypeScript)
+│   │   ├── config.ts        # Firebase initialization
 │   │   ├── auth.js          # Authentication methods
-│   │   ├── firestore.js     # Database operations
+│   │   ├── firestore.ts     # Database operations
 │   │   └── storage.js       # File upload/download
 │   │
-│   ├── hooks/               # Custom React hooks
-│   │   └── useAuth.js       # Auth state management
+│   ├── hooks/               # Custom React hooks (TypeScript)
+│   │   ├── useAuth.js       # Auth state management
+│   │   ├── useSimulation.ts # Simulation logic
+│   │   ├── useFirestore.ts  # Firestore operations
+│   │   ├── useDebounce.ts   # Value debouncing
+│   │   ├── useLocalStorage.ts # localStorage sync
+│   │   └── useOnlineStatus.ts # Network status
 │   │
-│   ├── utils/               # Utility functions
-│   │   └── aiService.js     # AI simulation & evaluation
+│   ├── utils/               # Utility functions (TypeScript)
+│   │   ├── aiService.js     # AI simulation & evaluation
+│   │   ├── errorHandling.ts # Error utilities
+│   │   ├── errorLogging.ts  # Error logging
+│   │   ├── analytics.ts     # Analytics tracking
+│   │   └── performanceMonitoring.ts # Performance tracking
 │   │
-│   ├── App.jsx              # Main app component
+│   ├── types/               # TypeScript type definitions
+│   │   ├── models.ts        # Data models
+│   │   ├── props.ts         # Component props
+│   │   └── api.ts           # API types
+│   │
+│   ├── test/                # Test utilities
+│   │   ├── setup.ts         # Test configuration
+│   │   ├── utils.tsx        # Test helpers
+│   │   └── integration/     # Integration tests
+│   │
+│   ├── App.tsx              # Main app component
 │   ├── App.css              # Styles
 │   ├── main.jsx             # Entry point
 │   └── index.css            # Global styles
 │
+├── docs/                    # Documentation
+│   ├── TESTING.md           # Testing guide
+│   ├── HOOKS.md             # Custom hooks documentation
+│   └── ARCHITECTURE.md      # Architecture decisions
+│
 ├── index.html
 ├── package.json
-├── vite.config.js
+├── tsconfig.json            # TypeScript configuration
+├── vite.config.ts           # Vite configuration
+├── vitest.config.ts         # Vitest configuration
 └── README.md
 ```
 
@@ -334,6 +401,18 @@ firebase deploy --only hosting
 ```bash
 firebase deploy
 ```
+
+---
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the `docs/` directory:
+
+- **[Quick Reference](./docs/QUICK_REFERENCE.md)** - Common commands and patterns at a glance
+- **[Testing Guide](./docs/TESTING.md)** - How to run and write tests
+- **[Custom Hooks](./docs/HOOKS.md)** - Documentation for all custom React hooks
+- **[Architecture Decisions](./docs/ARCHITECTURE.md)** - ADRs and design decisions
+- **[TypeScript Setup](./docs/TYPESCRIPT_SETUP.md)** - TypeScript configuration and patterns
 
 ---
 

@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
+type Theme = 'light' | 'dark';
+
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
     // Check localStorage first, then system preference, default to dark
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) return savedTheme;
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      return savedTheme;
+    }
     
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
       return 'light';
@@ -39,4 +43,3 @@ export default function ThemeToggle() {
     </button>
   );
 }
-
