@@ -121,7 +121,7 @@ const ScenarioSelect = memo(function ScenarioSelect({
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">Master Workplace Communication Through AI-Powered Simulations</h1>
+          <h1 className="hero-title">Simulate Workplace Communication Through AI-Powered Simulations</h1>
           <p className="hero-subtitle">
             Navigate tough conversations, pitch ideas to skeptical stakeholders, and handle difficult team situations—all in a safe environment where you can practice, learn, and grow without the pressure.
           </p>
