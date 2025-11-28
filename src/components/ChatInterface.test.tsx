@@ -237,7 +237,7 @@ describe('ChatInterface', () => {
     test('shows red color when near turn limit', () => {
       render(<ChatInterface {...defaultProps} turnCount={8} />);
 
-      const turnCounter = screen.getByText('8 / 10 turns');
+      const turnCounter = screen.getByText(/8 \/ 10 turns/);
       expect(turnCounter).toHaveStyle({ color: '#ef4444' });
     });
 
@@ -355,7 +355,7 @@ describe('ChatInterface', () => {
       const onGetSuggestions = vi.fn();
       render(<ChatInterface {...defaultProps} messages={mockMessages} onGetSuggestions={onGetSuggestions} />);
 
-      const hintsButton = screen.getByRole('button', { name: /hints/i });
+      const hintsButton = screen.getByRole('button', { name: /get ai suggestions/i });
       await user.click(hintsButton);
 
       expect(onGetSuggestions).toHaveBeenCalled();
@@ -364,14 +364,14 @@ describe('ChatInterface', () => {
     test('disables hints button when no messages', () => {
       render(<ChatInterface {...defaultProps} messages={[]} />);
 
-      const hintsButton = screen.getByRole('button', { name: /hints/i });
+      const hintsButton = screen.getByRole('button', { name: /get ai suggestions/i });
       expect(hintsButton).toBeDisabled();
     });
 
     test('disables hints button when loading suggestions', () => {
       render(<ChatInterface {...defaultProps} messages={mockMessages} isSuggestionsLoading={true} />);
 
-      const hintsButton = screen.getByRole('button', { name: /loading/i });
+      const hintsButton = screen.getByRole('button', { name: /get ai suggestions/i });
       expect(hintsButton).toBeDisabled();
     });
   });
