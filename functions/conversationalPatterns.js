@@ -173,12 +173,13 @@ const workplaceIdioms = [
 ];
 
 /**
- * Get a random pattern from a category
+ * Get random pattern(s) from a category
  * @param {string} category - Pattern category (openingPhrases, thinkingMarkers, etc.)
  * @param {string} state - Emotional state (neutral, skeptical, curious, etc.)
- * @return {string|null} Random pattern or null if not found
+ * @param {number} count - Number of patterns to return (default: 1)
+ * @return {string|Array<string>|null} Random pattern(s) or null if not found
  */
-function getRandomPattern(category, state = "neutral") {
+function getRandomPattern(category, state = "neutral", count = 1) {
   let patterns;
 
   switch (category) {
@@ -216,8 +217,24 @@ function getRandomPattern(category, state = "neutral") {
     return null;
   }
 
-  const randomIndex = Math.floor(Math.random() * patterns.length);
-  return patterns[randomIndex];
+  // If count is 1, return a single string (backward compatible)
+  if (count === 1) {
+    const randomIndex = Math.floor(Math.random() * patterns.length);
+    return patterns[randomIndex];
+  }
+
+  // If count > 1, return an array of random patterns
+  const result = [];
+  const availablePatterns = [...patterns]; // Copy to avoid modifying original
+  const actualCount = Math.min(count, availablePatterns.length);
+
+  for (let i = 0; i < actualCount; i++) {
+    const randomIndex = Math.floor(Math.random() * availablePatterns.length);
+    result.push(availablePatterns[randomIndex]);
+    availablePatterns.splice(randomIndex, 1); // Remove to avoid duplicates
+  }
+
+  return result;
 }
 
 /**
