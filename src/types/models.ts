@@ -20,6 +20,18 @@ export interface Stakeholder {
   personality: string;
   concerns: string[];
   motivations: string[];
+  communicationStyle?: {
+    directness: 'direct' | 'indirect' | 'balanced';
+    formality: 'formal' | 'casual' | 'professional';
+    emotionalExpressiveness: 'high' | 'medium' | 'low';
+    questioningStyle: 'probing' | 'supportive' | 'challenging';
+  };
+  speechPatterns?: {
+    averageSentenceLength: 'short' | 'medium' | 'long';
+    usesIdioms: boolean;
+    usesHumor: boolean;
+    thinkingPauses: 'frequent' | 'occasional' | 'rare';
+  };
 }
 
 export interface ScenarioTemplate {

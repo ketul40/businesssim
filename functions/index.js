@@ -19,6 +19,10 @@ require("dotenv").config();
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const OpenAI = require("openai");
+const {PersonalityEngine} = require("./personalityEngine");
+const {EmotionalStateTracker} = require("./emotionalStateTracker");
+const {ContextAnalyzer} = require("./contextAnalyzer");
+const ConversationalPatterns = require("./conversationalPatterns");
 
 admin.initializeApp();
 
@@ -78,8 +82,8 @@ exports.simulateStakeholder = functions.https.onCall(async (request) => {
   }
 
   try {
-    // Build the system prompt
-    const systemPrompt = buildSimulationPrompt(scenario);
+    // Build the enhanced system prompt with transcript context
+    const systemPrompt = buildSimulationPrompt(scenario, transcript);
 
     // Build conversation history
     const messages = [
@@ -91,13 +95,15 @@ exports.simulateStakeholder = functions.https.onCall(async (request) => {
       {role: "user", content: userMessage},
     ];
 
-    // Call OpenAI
+    // Call OpenAI with enhanced parameters
     const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini", // Cost-effective and fast
       messages: messages,
-      max_tokens: 250,
-      temperature: 0.9, // More natural, varied responses
+      max_tokens: 300, // Increased for natural flow
+      temperature: 1.0, // Increased for more variation
+      presence_penalty: 0.3, // Discourage repetition
+      frequency_penalty: 0.3, // Encourage varied vocabulary
     });
 
     const response = completion.choices[0].message.content;
@@ -293,20 +299,127 @@ exports.evaluateSession = functions.https.onCall(async (request) => {
 });
 
 /**
- * Helper: Build simulation system prompt
+ * Helper: Build enhanced simulation system prompt with personality, emotional state, and context
  * @param {object} scenario - The scenario configuration
- * @return {string} System prompt for OpenAI
+ * @param {Array} transcript - Conversation history (optional)
+ * @return {string} Enhanced system prompt for OpenAI
  */
-function buildSimulationPrompt(scenario) {
+function buildSimulationPrompt(scenario, transcript = []) {
   const stakeholder = scenario.stakeholders[0];
+
+  // Initialize enhancement components with error handling
+  let personalityEngine = null;
+  let emotionalStateTracker = null;
+  let contextAnalyzer = null;
+  let personalityInstructions = "";
+  let emotionalStateInstructions = "";
+  let contextReferences = "";
+  let examplePhrases = "";
+
+  // Track enhancement failures for logging
+  const enhancementFailures = [];
+
+  try {
+    // Initialize PersonalityEngine
+    personalityEngine = new PersonalityEngine(stakeholder);
+    personalityInstructions = personalityEngine.getLanguageInstructions();
+    examplePhrases = personalityEngine.getSamplePhrases();
+    console.log("PersonalityEngine initialized successfully");
+  } catch (error) {
+    console.error("PersonalityEngine initialization failed:", {
+      error: error.message,
+      stack: error.stack,
+      stakeholder: stakeholder?.name,
+      personality: stakeholder?.personality,
+    });
+    enhancementFailures.push("PersonalityEngine");
+    // Fallback to balanced personality
+    personalityInstructions = "Use a balanced, professional communication style.";
+    examplePhrases = "";
+  }
+
+  try {
+    // Initialize EmotionalStateTracker
+    emotionalStateTracker = new EmotionalStateTracker(stakeholder, scenario);
+    if (transcript && transcript.length > 0) {
+      emotionalStateTracker.analyzeTranscript(transcript);
+    }
+    emotionalStateInstructions = emotionalStateTracker.getStateInstructions();
+    console.log("EmotionalStateTracker initialized successfully");
+  } catch (error) {
+    console.error("EmotionalStateTracker initialization failed:", {
+      error: error.message,
+      stack: error.stack,
+      stakeholder: stakeholder?.name,
+      transcriptLength: transcript?.length || 0,
+    });
+    enhancementFailures.push("EmotionalStateTracker");
+    // Fallback to neutral state
+    emotionalStateInstructions = "Maintain a neutral, professional demeanor.";
+  }
+
+  try {
+    // Initialize ContextAnalyzer
+    if (transcript && transcript.length > 0) {
+      contextAnalyzer = new ContextAnalyzer(transcript);
+      const referencablePoints = contextAnalyzer.getReferencablePoints();
+      if (referencablePoints.length > 0) {
+        contextReferences = "\n\nKEY POINTS FROM CONVERSATION TO REFERENCE NATURALLY:\n" +
+          referencablePoints.map((point) => `• ${point.content}`).join("\n");
+      }
+      console.log("ContextAnalyzer initialized successfully");
+    }
+  } catch (error) {
+    console.error("ContextAnalyzer initialization failed:", {
+      error: error.message,
+      stack: error.stack,
+      transcriptLength: transcript?.length || 0,
+    });
+    enhancementFailures.push("ContextAnalyzer");
+    // Graceful degradation - continue without context references
+    contextReferences = "";
+  }
+
+  // Get conversational patterns for examples with error handling
+  let openingExamples = [];
+  let thinkingExamples = [];
+  let acknowledgmentExamples = [];
+
+  try {
+    openingExamples = ConversationalPatterns.getRandomPattern("openingPhrases", "neutral", 3);
+    thinkingExamples = ConversationalPatterns.getRandomPattern("thinkingMarkers", "neutral", 3);
+    acknowledgmentExamples = ConversationalPatterns.getRandomPattern("acknowledgments", "neutral", 3);
+    console.log("ConversationalPatterns loaded successfully");
+  } catch (error) {
+    console.error("ConversationalPatterns loading failed:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    enhancementFailures.push("ConversationalPatterns");
+    // Fallback to basic examples
+    openingExamples = ["Look,", "Here's the thing,", "You know,"];
+    thinkingExamples = ["Hmm,", "Let me think about that...", "Okay, so..."];
+    acknowledgmentExamples = ["I see what you're saying", "Fair point", "That makes sense"];
+  }
+
+  // Log overall enhancement status
+  if (enhancementFailures.length > 0) {
+    console.warn("Some enhancements failed but conversation will continue:", {
+      failures: enhancementFailures,
+      scenario: scenario?.title,
+      stakeholder: stakeholder?.name,
+    });
+  } else {
+    console.log("All enhancements initialized successfully");
+  }
 
   return `You are roleplaying as ${stakeholder.name}, ${stakeholder.role} at a tech company.
 
 ABOUT YOU:
 • Personality: ${stakeholder.personality}
-• Background: You've been in this role for 3 years and are known for being direct but fair
-• Communication style: Professional, asks probing questions, values specifics over generalities
-• Current mindset: Busy, slightly skeptical, but open to good ideas
+• Background: You've been in this role for 3 years and are experienced in your domain
+• Communication style: ${personalityInstructions}
+• Current emotional state: ${emotionalStateInstructions}
 
 YOUR PRIORITIES & CONCERNS:
 Concerns: ${stakeholder.concerns.join(", ")}
@@ -314,22 +427,82 @@ Motivations: ${stakeholder.motivations.join(", ")}
 
 TODAY'S MEETING:
 Context: ${scenario.situation}
-Your objective: Understand if this proposal is worth pursuing
+Your objective: ${scenario.objective || "Understand if this proposal is worth pursuing"}
 
 CURRENT CONSTRAINTS YOU'RE MANAGING:
 ${scenario.constraints.map((c) => `• ${c}`).join("\n")}
+${contextReferences}
 
-HOW TO ROLEPLAY:
-1. Respond naturally as a real person (1-4 sentences)
-2. React to what the user says - if they're vague, push for specifics; if they make a good point, acknowledge it
-3. Surface your concerns organically - don't list them all at once
-4. Occasionally show emotion (skepticism, interest, concern) through your tone
-5. Remember previous points in the conversation and reference them
-6. Don't break character or provide coaching/feedback
-7. If convinced by solid reasoning, you can warm up to the idea
-8. Use natural workplace language, including occasional: "Hmm," "I hear you, but..." "Walk me through..."
+HOW TO RESPOND NATURALLY (CRITICAL - READ CAREFULLY):
 
-Stay fully in character as ${stakeholder.name}. Respond naturally to what the user just said:`;
+1. LENGTH & STRUCTURE:
+   • Keep responses 1-4 sentences (vary the length unpredictably)
+   • Mix short punchy sentences with longer flowing ones
+   • Don't always use complete sentences - real people trail off sometimes
+   • Occasionally add a quick reaction before your main point
+
+2. USE CONTRACTIONS & INFORMAL LANGUAGE:
+   • Always use: "I'm" not "I am", "you're" not "you are", "that's" not "that is"
+   • Say "I don't know" not "I am uncertain"
+   • Say "What's your take?" not "What is your perspective?"
+   • Use workplace phrases like: "on the same page", "move the needle", "circle back"
+
+3. ADD NATURAL SPEECH PATTERNS:
+   • Start responses with: ${openingExamples.join(", ")}
+   • Show thinking with: ${thinkingExamples.join(", ")}
+   • Acknowledge points with: ${acknowledgmentExamples.join(", ")}
+   • Use hedges when uncertain: "maybe", "possibly", "I'm not entirely sure"
+   • Show emotion through tone: skepticism, curiosity, concern, interest
+
+4. VARY YOUR RESPONSES:
+   • Never repeat the same opening phrase twice in a row
+   • Don't use formulaic patterns like "I appreciate X, but Y"
+   • Change how you express similar ideas across the conversation
+   • Sometimes be direct, sometimes more exploratory
+
+5. REFERENCE CONTEXT NATURALLY:
+   • If the user made a commitment earlier, reference it: "Going back to what you said about..."
+   • If you notice a contradiction, call it out: "Wait, earlier you mentioned..."
+   • Build on previous points rather than treating each turn as isolated
+   • Track whether your concerns are being addressed
+
+6. SHOW REALISTIC WORKPLACE BEHAVIOR:
+   • Mention time constraints: "I've got another meeting in 10 minutes"
+   • Reference realistic processes: "I'd need to run this by the team"
+   • Bring up practical concerns: "What's the timeline?" "Do we have budget?"
+   • Include plausible background details when relevant
+
+7. EMOTIONAL AUTHENTICITY:
+   • If the user is vague, show frustration or skepticism
+   • If they make a strong point, acknowledge it genuinely
+   • Warm up gradually if they address your concerns well
+   • Don't hide your reactions - let them show through your words
+${examplePhrases}
+
+WHAT NOT TO DO:
+• Don't list all your concerns at once - surface them organically
+• Don't be overly formal or robotic
+• Don't use phrases like "I would like to inquire" - too stiff
+• Don't always start with the same pattern
+• Don't provide coaching or break character
+• Don't ignore what was said before
+• Don't be artificially positive - be realistic
+
+EXAMPLES OF NATURAL RESPONSES:
+
+User: "I think we should expand to the European market."
+Bad: "I appreciate your suggestion. However, I have concerns about the European market expansion."
+Good: "Hmm, Europe's interesting but... what's driving that? We've got our hands full with the US market right now."
+
+User: "We could start with just Germany and France."
+Bad: "That is a more focused approach. What is your timeline for this expansion?"
+Good: "Okay, that's more manageable. Walk me through the timeline - when would we actually launch?"
+
+User: "I'm thinking Q3 next year."
+Bad: "I see. That timeline seems reasonable given our current constraints."
+Good: "Q3... that gives us some breathing room. But I'm still not clear on the budget side of this."
+
+Stay fully in character as ${stakeholder.name}. Respond naturally to what the user just said, using contractions, varied structure, and authentic workplace language:`;
 }
 
 /**

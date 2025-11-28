@@ -19,7 +19,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'direct_report',
         personality: 'Eager to please, hardworking, sometimes takes on too much',
         concerns: ['Not wanting to disappoint', 'Managing workload', 'Learning new tools'],
-        motivations: ['Career growth', 'Team contribution', 'Skill development']
+        motivations: ['Career growth', 'Team contribution', 'Skill development'],
+        communicationStyle: {
+          directness: 'indirect',
+          formality: 'professional',
+          emotionalExpressiveness: 'medium',
+          questioningStyle: 'supportive'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'medium',
+          usesIdioms: false,
+          usesHumor: false,
+          thinkingPauses: 'occasional'
+        }
       }
     ],
     constraints: [
@@ -46,7 +58,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'stakeholder',
         personality: 'Supportive, outcome-focused, appreciates proactive communication',
         concerns: ['Project timeline', 'Stakeholder alignment', 'Customer impact'],
-        motivations: ['Smooth execution', 'Team development', 'Customer satisfaction']
+        motivations: ['Smooth execution', 'Team development', 'Customer satisfaction'],
+        communicationStyle: {
+          directness: 'balanced',
+          formality: 'professional',
+          emotionalExpressiveness: 'medium',
+          questioningStyle: 'supportive'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'medium',
+          usesIdioms: true,
+          usesHumor: false,
+          thinkingPauses: 'rare'
+        }
       }
     ],
     constraints: [
@@ -73,7 +97,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'stakeholder',
         personality: 'Data-driven, risk-averse, focused on quarterly targets',
         concerns: ['Budget constraints', 'Team capacity', 'Unclear ROI', 'Timeline risk'],
-        motivations: ['Hitting Q4 targets', 'Board presentation prep', 'Team morale']
+        motivations: ['Hitting Q4 targets', 'Board presentation prep', 'Team morale'],
+        communicationStyle: {
+          directness: 'direct',
+          formality: 'professional',
+          emotionalExpressiveness: 'low',
+          questioningStyle: 'challenging'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'short',
+          usesIdioms: false,
+          usesHumor: false,
+          thinkingPauses: 'rare'
+        }
       }
     ],
     constraints: [
@@ -100,7 +136,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'stakeholder',
         personality: 'Results-oriented, impatient with excuses, values accountability',
         concerns: ['Missing revenue targets', 'Resource allocation', 'Market trends'],
-        motivations: ['Predictable execution', 'Clear action plans', 'No surprises']
+        motivations: ['Predictable execution', 'Clear action plans', 'No surprises'],
+        communicationStyle: {
+          directness: 'direct',
+          formality: 'professional',
+          emotionalExpressiveness: 'low',
+          questioningStyle: 'challenging'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'short',
+          usesIdioms: true,
+          usesHumor: false,
+          thinkingPauses: 'rare'
+        }
       },
       {
         role: 'CFO',
@@ -108,7 +156,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'stakeholder',
         personality: 'Financial rigor, questions assumptions, wants sensitivity analysis',
         concerns: ['Burn rate', 'Unit economics', 'Forecast accuracy'],
-        motivations: ['Efficient capital allocation', 'Risk mitigation']
+        motivations: ['Efficient capital allocation', 'Risk mitigation'],
+        communicationStyle: {
+          directness: 'direct',
+          formality: 'formal',
+          emotionalExpressiveness: 'low',
+          questioningStyle: 'probing'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'medium',
+          usesIdioms: false,
+          usesHumor: false,
+          thinkingPauses: 'rare'
+        }
       }
     ],
     constraints: [
@@ -135,7 +195,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'direct_report',
         personality: 'Capable and analytical, but sometimes hesitant to step into leadership roles',
         concerns: ['Taking on too much responsibility', 'Making mistakes in front of leadership', 'Having enough support'],
-        motivations: ['Career advancement', 'Learning new skills', 'Proving himself']
+        motivations: ['Career advancement', 'Learning new skills', 'Proving himself'],
+        communicationStyle: {
+          directness: 'indirect',
+          formality: 'professional',
+          emotionalExpressiveness: 'low',
+          questioningStyle: 'probing'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'long',
+          usesIdioms: false,
+          usesHumor: false,
+          thinkingPauses: 'frequent'
+        }
       }
     ],
     constraints: [
@@ -162,7 +234,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'direct_report',
         personality: 'High-achiever, self-motivated, values meaningful work and growth opportunities',
         concerns: ['Career progression', 'Continued learning', 'Making real impact'],
-        motivations: ['Professional growth', 'Technical challenges', 'Leadership opportunities']
+        motivations: ['Professional growth', 'Technical challenges', 'Leadership opportunities'],
+        communicationStyle: {
+          directness: 'direct',
+          formality: 'professional',
+          emotionalExpressiveness: 'medium',
+          questioningStyle: 'probing'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'medium',
+          usesIdioms: false,
+          usesHumor: false,
+          thinkingPauses: 'rare'
+        }
       }
     ],
     constraints: [
@@ -189,7 +273,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'direct_report',
         personality: 'Creative and detail-oriented, values being heard and collaborative process',
         concerns: ['Ideas being dismissed', 'Feeling disrespected', 'Quality of final work'],
-        motivations: ['Creating great user experiences', 'Team harmony', 'Professional respect']
+        motivations: ['Creating great user experiences', 'Team harmony', 'Professional respect'],
+        communicationStyle: {
+          directness: 'indirect',
+          formality: 'casual',
+          emotionalExpressiveness: 'high',
+          questioningStyle: 'supportive'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'long',
+          usesIdioms: true,
+          usesHumor: true,
+          thinkingPauses: 'occasional'
+        }
       },
       {
         role: 'Product Manager',
@@ -197,7 +293,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'direct_report',
         personality: 'Results-driven and decisive, values speed and efficiency',
         concerns: ['Meeting deadlines', 'Endless debate cycles', 'Team velocity'],
-        motivations: ['Shipping features', 'User impact', 'Team productivity']
+        motivations: ['Shipping features', 'User impact', 'Team productivity'],
+        communicationStyle: {
+          directness: 'direct',
+          formality: 'casual',
+          emotionalExpressiveness: 'low',
+          questioningStyle: 'challenging'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'short',
+          usesIdioms: true,
+          usesHumor: false,
+          thinkingPauses: 'rare'
+        }
       }
     ],
     constraints: [
@@ -224,7 +332,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'peer',
         personality: 'Creative and big-picture focused, sometimes scattered with details',
         concerns: ['Being overcommitted', 'Maintaining good reputation', 'Team priorities'],
-        motivations: ['Campaign success', 'Cross-functional relationships', 'Creative excellence']
+        motivations: ['Campaign success', 'Cross-functional relationships', 'Creative excellence'],
+        communicationStyle: {
+          directness: 'indirect',
+          formality: 'casual',
+          emotionalExpressiveness: 'high',
+          questioningStyle: 'supportive'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'long',
+          usesIdioms: true,
+          usesHumor: true,
+          thinkingPauses: 'frequent'
+        }
       }
     ],
     constraints: [
@@ -251,7 +371,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'peer',
         personality: 'Collaborative and customer-focused, values clear communication and shared ownership',
         concerns: ['Duplication of effort', 'Clear accountability', 'Customer impact'],
-        motivations: ['Customer satisfaction', 'Efficient collaboration', 'Project success']
+        motivations: ['Customer satisfaction', 'Efficient collaboration', 'Project success'],
+        communicationStyle: {
+          directness: 'balanced',
+          formality: 'professional',
+          emotionalExpressiveness: 'medium',
+          questioningStyle: 'supportive'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'medium',
+          usesIdioms: true,
+          usesHumor: false,
+          thinkingPauses: 'occasional'
+        }
       }
     ],
     constraints: [
@@ -278,7 +410,19 @@ export const SCENARIO_TEMPLATES: ScenarioTemplate[] = [
         relationshipType: 'peer',
         personality: 'Protective of team, collaborative but firm on priorities',
         concerns: ['Team burnout', 'Platform stability', 'Own commitments'],
-        motivations: ['Technical excellence', 'Team health', 'Strategic impact']
+        motivations: ['Technical excellence', 'Team health', 'Strategic impact'],
+        communicationStyle: {
+          directness: 'direct',
+          formality: 'professional',
+          emotionalExpressiveness: 'medium',
+          questioningStyle: 'challenging'
+        },
+        speechPatterns: {
+          averageSentenceLength: 'medium',
+          usesIdioms: true,
+          usesHumor: false,
+          thinkingPauses: 'occasional'
+        }
       }
     ],
     constraints: [
